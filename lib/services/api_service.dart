@@ -1,11 +1,12 @@
-// services/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../models/passage.dart';
 
 class ApiService {
   final String baseUrl = 'https://api.esv.org/v3/passage/text/';
-  final String apiKey = '55f2db97422b5bf8471448dd1e306287b71a1aad';
+  final String apiKey = dotenv.env['ESV_API_KEY']!;
 
   Future<List<Passage>> fetchPassages(String passages, {bool includeVerseNumbers = false, bool includeFootnotes = false}) async {
     final queryParameters = {

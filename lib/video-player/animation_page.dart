@@ -10,14 +10,16 @@ import 'dart:io';
 import 'consts.dart';
 
 class Step {
-  final double duration; // Duration in seconds for this step
+  final double startFrom; // Start time in seconds for this step
+  final double endAt; // End time in seconds for this step
   final List<String>? verses; // List of related verses for this step
   final String info; // Additional information for this step
   final String additionalText; // Additional text for this step
   final String additionalDialogMessage; // Dialog message for this step
 
   Step({
-    required this.duration,
+    required this.startFrom,
+    required this.endAt,
     required this.verses,
     required this.info,
     required this.additionalText,
@@ -79,22 +81,8 @@ class _AnimationPageState extends State<AnimationPage> {
   void _prevStep() {
     setState(() {
       if (_currentStep > 0) {
+        _controller.seekTo(Duration(seconds: steps[_currentStep].startFrom.floor(), milliseconds: steps[_currentStep].startFrom.remainder(1).toInt()));
         _currentStep--;
-
-        // Calculate the starting point of the current step
-        double startTimeInSeconds = 0;
-        for (int i = 0; i <= _currentStep; i++) {
-          startTimeInSeconds += steps[i].duration;
-        }
-
-        // Seek to the starting point of the current step
-        _controller.seekTo(Duration(
-          seconds: startTimeInSeconds.floor(),
-          milliseconds: ((startTimeInSeconds - startTimeInSeconds.floor()) * 1000).toInt(),
-        ));
-
-        // Optionally, you can pause the video here if you want
-        // _controller.pause();
       }
     });
   }
@@ -104,15 +92,13 @@ class _AnimationPageState extends State<AnimationPage> {
       _isPlaying = true;
     });
 
-    Duration currentDuration = _controller.value.position;
-    Duration targetDuration = currentDuration +
-        Duration(
-          seconds: steps[_currentStep].duration.floor(),
-          milliseconds: ((steps[_currentStep].duration - steps[_currentStep].duration.floor()) * 1000).toInt(),
-        );
+    Duration start = Duration(seconds: steps[_currentStep].startFrom.floor(), milliseconds: steps[_currentStep].startFrom.remainder(1).toInt());
+    Duration end = Duration(seconds: steps[_currentStep].endAt.floor(), milliseconds: steps[_currentStep].endAt.remainder(1).toInt());
 
+    _controller.seekTo(start);
     _controller.play();
-    Future.delayed(targetDuration - currentDuration, () {
+
+    Future.delayed(end - start, () {
       _controller.pause();
       setState(() {
         _isPlaying = false;
@@ -177,8 +163,6 @@ class _AnimationPageState extends State<AnimationPage> {
     setState(() {
       _currentStep = -1;
       _controller.seekTo(Duration.zero);
-      // Optionally, you can play the video from the start
-      // _controller.play();
     });
   }
 
@@ -201,11 +185,9 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 
-  // bool _isFirstTime = true;
-
   Widget _buildFooterButtons() {
     if (_currentStep == -1) {
-      return Container(); // Return an empty container if _currentStep is -1
+      return Container();
     }
 
     return Row(
@@ -238,7 +220,7 @@ class _AnimationPageState extends State<AnimationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0), // here the desired height
+        preferredSize: const Size.fromHeight(50.0),
         child: AppBar(
           title: const Text('Bridge Diagram'),
           actions: [
@@ -254,9 +236,9 @@ class _AnimationPageState extends State<AnimationPage> {
       body: GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity! < 0) {
-            _nextStep(); // Swiped left
+            _nextStep();
           } else if (details.primaryVelocity! > 0) {
-            _prevStep(); // Swiped right
+            _prevStep();
           }
         },
         child: Stack(
@@ -265,21 +247,6 @@ class _AnimationPageState extends State<AnimationPage> {
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  // if (_isFirstTime) {
-                  //   _controller.play();
-
-                  //   // Pause the video after the duration specified in steps[0]
-                  //   Future.delayed(
-                  //       Duration(
-                  //         seconds: steps[0].duration.floor(),
-                  //         milliseconds: ((steps[0].duration - steps[0].duration.floor()) * 1000).toInt(),
-                  //       ), () {
-                  //     _controller.pause();
-                  //   });
-
-                  //   _isFirstTime = false; // Step 3: Set the flag to false
-                  // }
-
                   return SizedBox.expand(
                     child: FittedBox(
                       fit: BoxFit.fill,
@@ -326,7 +293,6 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 }
-
 // TODO:
 
 // 1. ESV API support - done
@@ -337,3 +303,4 @@ class _AnimationPageState extends State<AnimationPage> {
 // 6. do we wanna add audio to parts?
 // 7. add drawing canvas
 // 8. bring back portrait mode for other pages - done
+// 9. add caching for esv api
