@@ -14,7 +14,7 @@ void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('settings');
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "assets/.env");
 
   // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]).then((value) => runApp(const MyApp()));
   runApp(const MyApp());
