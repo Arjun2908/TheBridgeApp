@@ -9,6 +9,7 @@ import 'package:the_bridge_app/providers/settings_provider.dart';
 import 'package:the_bridge_app/settings-page.dart/settings_page.dart';
 import 'package:the_bridge_app/about-page/about_page.dart';
 import 'package:the_bridge_app/video-player/animation_page.dart';
+import 'package:the_bridge_app/video/video_page.dart';
 
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -25,17 +26,17 @@ Color getColorFromName(String colorName) {
   // 'blue', 'green', 'red', 'purple', 'orange'
   switch (colorName.toLowerCase()) {
     case 'green':
-      return Colors.green;
+      return const Color.fromRGBO(253, 247, 221, 1);
     case 'blue':
-      return Colors.blue;
+      return const Color.fromRGBO(253, 246, 222, 1);
     case 'red':
-      return Colors.red;
+      return const Color.fromRGBO(253, 246, 222, 1.000);
     case 'purple':
-      return Colors.purple;
+      return const Color.fromRGBO(253, 246, 222, 1.000);
     case 'orange':
-      return Colors.orange;
+      return const Color.fromRGBO(253, 246, 222, 1.000);
     default:
-      return Colors.green;
+      return const Color.fromRGBO(253, 246, 222, 1.000);
   }
 }
 
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
             home: const HomePage(),
             routes: {
               '/main': (context) => const AnimationPage(),
+              '/video': (context) => const VideoPage(),
               '/settings': (context) => const SettingsPage(),
               '/about': (context) => const AboutPage(),
             },
@@ -109,9 +111,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bridge Diagram Tutorial'),
-      ),
+      appBar: AppBar(title: const Text('Bridge Diagram Tutorial'), backgroundColor: Theme.of(context).colorScheme.secondaryContainer),
       body: Stack(
         children: [
           Center(
@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/main');
+                    Navigator.pushNamed(context, '/video');
                   },
                   child: const Text('Video Tutorial'),
                 ),

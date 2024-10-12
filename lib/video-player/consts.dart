@@ -68,7 +68,7 @@ final List<Step> steps = [
         "As we look closer we see that not only is God loving, but He is perfect. His actions are always good, He never does evil. He is perfect in everything He does. He is perfectly loving; he is perfect in his understanding; and he is perfectly just.",
   ),
   Step(
-    startFrom: 24,
+    startFrom: 23.5,
     endAt: 26,
     verses: ["Isaiah 33:22", "Psalm 9:7-8"],
     info: "As the creator of everything He has ultimate authority over his creation and His perfect justice dictates that evil deserves punishment and goodness deserves reward.",

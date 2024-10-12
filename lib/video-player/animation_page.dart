@@ -48,7 +48,7 @@ class AnimationPage extends StatefulWidget {
 class _AnimationPageState extends State<AnimationPage> {
   late VideoPlayerController _controller;
   late Future<void> _initializeVideoPlayerFuture;
-  int _currentStep = -1;
+  int _currentStep = 0;
   bool _isPlaying = false;
 
   @override
@@ -71,38 +71,92 @@ class _AnimationPageState extends State<AnimationPage> {
 
   void _nextStep() {
     setState(() {
-      if (_currentStep < steps.length - 1) {
-        _currentStep++;
+      if (_currentStep < steps.length) {
         _playStep();
+        _currentStep++;
       }
+    });
+  }
+
+  void _playStep() async {
+    setState(() {
+      _isPlaying = true;
+    });
+
+    Duration start = Duration(
+      seconds: steps[_currentStep].startFrom.floor(),
+      milliseconds: (steps[_currentStep].startFrom.remainder(1) * 1000).toInt(),
+    );
+    Duration end = Duration(
+      seconds: steps[_currentStep].endAt.floor(),
+      milliseconds: (steps[_currentStep].endAt.remainder(1) * 1000).toInt(),
+    );
+
+    await _initializeVideoPlayerFuture;
+
+    bool seekSuccessful = false;
+    const int maxRetries = 10;
+    const Duration retryDelay = Duration(milliseconds: 500);
+    int retryCount = 0;
+
+    // Check if the video is initialized before seeking
+    if (_controller.value.isInitialized) {
+      while (!seekSuccessful && retryCount < maxRetries) {
+        try {
+          _controller.seekTo(start);
+          await Future.delayed(const Duration(milliseconds: 100)); // Short delay to let seek take effect
+
+          // Check if seek was successful
+          if (_controller.value.position >= start && _controller.value.position <= start + const Duration(milliseconds: 100)) {
+            seekSuccessful = true;
+          } else {
+            await Future.delayed(retryDelay);
+          }
+        } catch (error) {
+          // Handle seek error
+        }
+
+        retryCount++;
+        if (!seekSuccessful && retryCount < maxRetries) {
+          await Future.delayed(retryDelay);
+        }
+      }
+    } else {}
+
+    if (!seekSuccessful) {
+      setState(() {
+        _isPlaying = false;
+      });
+      return; // Exit if seek operation fails
+    }
+
+    // Ensure video is not already playing and then start playback
+    if (_controller.value.isInitialized && !_controller.value.isPlaying) {
+      try {
+        await _controller.play();
+      } catch (error) {}
+    } else {}
+
+    // Delay for pausing only after confirming playback
+    Future.delayed(end - start, () {
+      if (_controller.value.isPlaying) {
+        _controller.pause().catchError((error) {});
+      }
+      setState(() {
+        _isPlaying = false;
+      });
     });
   }
 
   void _prevStep() {
     setState(() {
       if (_currentStep > 0) {
-        _controller.seekTo(Duration(seconds: steps[_currentStep].startFrom.floor(), milliseconds: steps[_currentStep].startFrom.remainder(1).toInt()));
         _currentStep--;
+        _controller.seekTo(Duration(
+          seconds: steps[_currentStep].startFrom.floor(),
+          milliseconds: (steps[_currentStep].startFrom.remainder(1)).toInt(),
+        ));
       }
-    });
-  }
-
-  void _playStep() {
-    setState(() {
-      _isPlaying = true;
-    });
-
-    Duration start = Duration(seconds: steps[_currentStep].startFrom.floor(), milliseconds: steps[_currentStep].startFrom.remainder(1).toInt());
-    Duration end = Duration(seconds: steps[_currentStep].endAt.floor(), milliseconds: steps[_currentStep].endAt.remainder(1).toInt());
-
-    _controller.seekTo(start);
-    _controller.play();
-
-    Future.delayed(end - start, () {
-      _controller.pause();
-      setState(() {
-        _isPlaying = false;
-      });
     });
   }
 
@@ -191,26 +245,29 @@ class _AnimationPageState extends State<AnimationPage> {
     }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         ElevatedButton(
-          onPressed: _showVerses,
-          child: const Text('Show Verses'),
+          onPressed: _currentStep < 0 ? null : _prevStep,
+          child: const Icon(Icons.chevron_left),
         ),
-        const SizedBox(width: 20),
-        ElevatedButton(
-          onPressed: _showAdditionalInfo,
-          child: Text(steps[_currentStep].additionalText),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _showVerses,
+              child: const Text('Show Verses'),
+            ),
+            const SizedBox(width: 20),
+            ElevatedButton(
+              onPressed: _showAdditionalInfo,
+              child: Text(steps[_currentStep == 0 ? 0 : _currentStep - 1].additionalText),
+            ),
+          ],
         ),
-        const SizedBox(width: 20),
         ElevatedButton(
-          onPressed: _showMoreInfo,
-          child: const Text('More Info'),
-        ),
-        const SizedBox(width: 20),
-        ElevatedButton(
-          onPressed: _startOver,
-          child: const Text('Start Over'),
+          onPressed: _currentStep == steps.length ? null : _nextStep,
+          child: const Icon(Icons.chevron_right),
         ),
       ],
     );
@@ -219,10 +276,12 @@ class _AnimationPageState extends State<AnimationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(253, 246, 222, 1.000),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: AppBar(
-          title: const Text('Bridge Diagram'),
+          backgroundColor: const Color.fromRGBO(253, 246, 222, 1.000),
+          // title: const Text('Bridge Diagram'),
           actions: [
             IconButton(
               onPressed: () {
@@ -241,55 +300,46 @@ class _AnimationPageState extends State<AnimationPage> {
             _prevStep();
           }
         },
-        child: Stack(
-          children: [
-            FutureBuilder(
-              future: _initializeVideoPlayerFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: SizedBox(
-                        width: _controller.value.size.width,
-                        height: _controller.value.size.height,
-                        child: VideoPlayer(_controller),
-                      ),
+        child: FutureBuilder(
+          future: _initializeVideoPlayerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Container(
+                padding: const EdgeInsets.only(left: 10, right: 20),
+                // margin: const EdgeInsets.all(8.0),
+                child: SizedBox.expand(
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: SizedBox(
+                      width: _controller.value.size.width,
+                      height: _controller.value.size.height,
+                      child: VideoPlayer(_controller),
                     ),
-                  );
-                } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              },
-            ),
-            Positioned(
-              top: 10,
-              left: 10,
-              child: ElevatedButton(
-                onPressed: _isPlaying || _currentStep <= 0 ? null : _prevStep,
-                child: const Icon(Icons.chevron_left),
-              ),
-            ),
-            Positioned(
-              top: 10,
-              right: 10,
-              child: ElevatedButton(
-                onPressed: _isPlaying || _currentStep == steps.length - 1 ? null : _nextStep,
-                child: const Icon(Icons.chevron_right),
-              ),
-            ),
-          ],
+                  ),
+                ),
+              );
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
         ),
       ),
-      persistentFooterAlignment: AlignmentDirectional.center,
-      persistentFooterButtons: [
-        SizedBox(
-          height: 35,
-          child: _buildFooterButtons(),
-        ),
-      ],
+      bottomNavigationBar: Container(
+        // height: 35,
+        padding: const EdgeInsets.all(20),
+        color: const Color.fromRGBO(253, 246, 222, 1.000),
+        child: _buildFooterButtons(),
+      ),
+      // persistentFooterAlignment: AlignmentDirectional.center,
+      // persistentFooterButtons: [
+      //   Container(
+      //     height: 35,
+      //     color: const Color.fromRGBO(253, 246, 222, 1.000),
+      //     child: _buildFooterButtons(),
+      //   ),
+      // ],
     );
   }
 }

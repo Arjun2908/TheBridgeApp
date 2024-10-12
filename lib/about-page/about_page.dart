@@ -97,7 +97,7 @@ class AboutPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '- Arjun Gupta: Lead Developer\n'
+                  '- Arjun Gupta: Developer\n'
                   '- Bradley Hicks: Script and Content Creator\n'
                   '- Rachel Hicks: Graphics designer',
                   style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize)),
