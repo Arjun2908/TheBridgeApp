@@ -82,6 +82,25 @@ flutter:
     - assets/bridge_diagram.png
     - assets/background.gif
     - assets/background.mp4
+    - assets/output_step_1.mp4
+    - assets/output_step_2.mp4
+    - assets/output_step_3.mp4
+    - assets/output_step_4.mp4
+    - assets/output_step_5.mp4
+    - assets/output_step_6.mp4
+    - assets/output_step_7.mp4
+    - assets/output_step_8.mp4
+    - assets/output_step_9.mp4
+    - assets/output_step_10.mp4
+    - assets/output_step_11.mp4
+    - assets/output_step_12.mp4
+    - assets/output_step_13.mp4
+    - assets/output_step_14.mp4
+    - assets/output_step_15.mp4
+    - assets/output_step_16.mp4
+    - assets/output_step_17.mp4
+    - assets/output_step_18.mp4
+    - assets/output_step_19.mp4
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
