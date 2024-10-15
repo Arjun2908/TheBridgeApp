@@ -112,7 +112,7 @@ class AboutPage extends StatelessWidget {
                   text: TextSpan(
                     text:
                         'We want to keep making improvements to the app and make it a reliable tool of God to reach people all over the world, and we are super eager for any feedback and improvements we can make to reach our goal. If you have any questions or feedback, feel free to reach out to us at support@arjungupta.dev, or fill out our ',
-                    style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize), color: Colors.black),
+                    style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize)),
                     children: [
                       TextSpan(
                         text: 'feedback form',
@@ -127,7 +127,7 @@ class AboutPage extends StatelessWidget {
                       ),
                       TextSpan(
                         text: '.',
-                        style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize), color: Colors.black),
+                        style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize)),
                       ),
                     ],
                   ),

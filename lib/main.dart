@@ -26,17 +26,17 @@ Color getColorFromName(String colorName) {
   // 'blue', 'green', 'red', 'purple', 'orange'
   switch (colorName.toLowerCase()) {
     case 'green':
-      return const Color.fromRGBO(253, 247, 221, 1);
+      return Colors.green;
     case 'blue':
-      return const Color.fromRGBO(253, 246, 222, 1);
+      return Colors.blue;
     case 'red':
-      return const Color.fromRGBO(253, 246, 222, 1.000);
+      return Colors.red;
     case 'purple':
-      return const Color.fromRGBO(253, 246, 222, 1.000);
+      return Colors.purple;
     case 'orange':
-      return const Color.fromRGBO(253, 246, 222, 1.000);
+      return Colors.orange;
     default:
-      return const Color.fromRGBO(253, 246, 222, 1.000);
+      return Colors.green;
   }
 }
 
@@ -111,7 +111,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bridge Diagram Tutorial'), backgroundColor: Theme.of(context).colorScheme.secondaryContainer),
+      appBar: AppBar(title: const Text('Bridge Diagram Tutorial')),
       body: Stack(
         children: [
           Center(
