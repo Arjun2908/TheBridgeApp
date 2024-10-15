@@ -44,19 +44,21 @@ class AnimationPage extends StatefulWidget {
 }
 
 class _AnimationPageState extends State<AnimationPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late VideoPlayerController _controller;
-  late VideoPlayerController? _nextController = VideoPlayerController.asset(steps[1].videoPath);
-  late VideoPlayerController? _prevController = VideoPlayerController.asset(steps[0].videoPath);
+  VideoPlayerController? _nextController = VideoPlayerController.asset(steps[1].videoPath);
+  VideoPlayerController? _prevController = VideoPlayerController.asset(steps[0].videoPath);
   late Future<void> _initializeVideoPlayerFuture;
-  late Future<void>? _initializeNextVideoPlayerFuture;
-  late Future<void>? _initializePrevVideoPlayerFuture;
+  Future<void>? _initializeNextVideoPlayerFuture;
+  Future<void>? _initializePrevVideoPlayerFuture;
   int _currentStep = 0;
+  String _drawerContent = '';
 
   @override
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
     _loadVideoForStep(_currentStep);
   }
@@ -74,6 +76,7 @@ class _AnimationPageState extends State<AnimationPage> {
       _initializeNextVideoPlayerFuture = _nextController!.initialize();
     }
 
+    // Preload the previous video if it's available
     if (stepIndex > 0) {
       _prevController = VideoPlayerController.asset(steps[stepIndex - 1].videoPath);
       _initializePrevVideoPlayerFuture = _prevController!.initialize();
@@ -82,7 +85,11 @@ class _AnimationPageState extends State<AnimationPage> {
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     _controller.dispose();
     _nextController?.dispose();
     _prevController?.dispose();
@@ -93,10 +100,12 @@ class _AnimationPageState extends State<AnimationPage> {
     if (_currentStep < steps.length - 1) {
       await _controller.pause(); // Pause current video
       await _nextController?.seekTo(Duration.zero); // Seek to the start
+
       setState(() {
         _currentStep++;
         _controller = _nextController!; // Swap to the preloaded next video
       });
+
       _controller.play(); // Play the preloaded video
 
       // Preload the next video if possible
@@ -117,26 +126,24 @@ class _AnimationPageState extends State<AnimationPage> {
     if (_currentStep > 0) {
       await _controller.pause(); // Pause current video
       await _prevController?.seekTo(Duration.zero); // Seek to the start
+
       setState(() {
         _currentStep--;
         _controller = _prevController!; // Swap to the preloaded previous video
-        // _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-        //   _controller.seekTo(Duration.zero); // Seek to the start
-        //   _controller.play(); // Play the current video
-        // });
       });
+
       _controller.play(); // Play the preloaded video
 
-      // Preload the next video
-      if (_currentStep < steps.length - 1) {
-        _nextController = VideoPlayerController.asset(steps[_currentStep + 1].videoPath);
-        _initializeNextVideoPlayerFuture = _nextController!.initialize();
-      }
-
-      // Preload the previous video
+      // Preload the previous video if possible
       if (_currentStep > 0) {
         _prevController = VideoPlayerController.asset(steps[_currentStep - 1].videoPath);
         _initializePrevVideoPlayerFuture = _prevController!.initialize();
+      }
+
+      // Preload the next video if possible
+      if (_currentStep < steps.length - 1) {
+        _nextController = VideoPlayerController.asset(steps[_currentStep + 1].videoPath);
+        _initializeNextVideoPlayerFuture = _nextController!.initialize();
       }
     }
   }
@@ -145,72 +152,146 @@ class _AnimationPageState extends State<AnimationPage> {
     context.read<PassagesProvider>().fetchPassages(verse);
   }
 
+  // void _showVerses() {
+  //   _getVerse(steps[_currentStep].verses!.join(' '));
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         child: IntrinsicWidth(
+  //           child: SingleChildScrollView(
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.end,
+  //                   children: [
+  //                     IconButton(
+  //                       icon: const Icon(Icons.close),
+  //                       onPressed: () {
+  //                         Navigator.of(context).pop();
+  //                       },
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 Consumer<PassagesProvider>(
+  //                   builder: (context, passageProvider, child) {
+  //                     if (passageProvider.isLoading) {
+  //                       return const Center(child: CircularProgressIndicator());
+  //                     }
+  //                     if (passageProvider.passages != null) {
+  //                       return SingleChildScrollView(
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+  //                           child: Text(
+  //                             passageProvider.passages!.map((passage) => passage.text).join('\n\n'),
+  //                           ),
+  //                         ),
+  //                       );
+  //                     }
+  //                     return const Center(child: Text('Enter a passage to fetch'));
+  //                   },
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   void _showVerses() {
     _getVerse(steps[_currentStep].verses!.join(' '));
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: Consumer<PassagesProvider>(
-            builder: (context, passageProvider, child) {
-              if (passageProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (passageProvider.passages != null) {
-                return SingleChildScrollView(child: Text(passageProvider.passages!.map((passage) => passage.text).join('\n\n')));
-              }
-              return const Center(child: Text('Enter a passage to fetch'));
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showMoreInfo() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: SingleChildScrollView(child: Text(steps[_currentStep].info)),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
+    setState(() {
+      _drawerContent = 'verses';
+    });
+    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void _showAdditionalInfo() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: SingleChildScrollView(child: Text(steps[_currentStep].additionalDialogMessage)),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
+    setState(() {
+      _drawerContent = 'additionalInfo';
+    });
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  // void _showAdditionalInfo() {
+  //   _scaffoldKey.currentState?.openEndDrawer();
+  // }
+
+  // void _showAdditionalInfo() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return Dialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //         child: SizedBox(
+  //           width: 500,
+  //           child: SingleChildScrollView(
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.end,
+  //                   children: [
+  //                     IconButton(
+  //                       icon: const Icon(Icons.close),
+  //                       onPressed: () {
+  //                         Navigator.of(context).pop();
+  //                       },
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 SingleChildScrollView(
+  //                   child: Padding(
+  //                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+  //                     child: Text(steps[_currentStep].additionalDialogMessage),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  Widget _buildDrawerContent() {
+    if (_drawerContent == 'verses') {
+      return Consumer<PassagesProvider>(
+        builder: (context, passageProvider, child) {
+          if (passageProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (passageProvider.passages != null) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+                child: Text(
+                  passageProvider.passages!.map((passage) => passage.text).join('\n\n'),
+                ),
+              ),
+            );
+          }
+          return const Center(child: Text('Enter a passage to fetch'));
+        },
+      );
+    } else if (_drawerContent == 'additionalInfo') {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+          child: Text(steps[_currentStep].additionalDialogMessage),
+        ),
+      );
+    }
+    return Container();
   }
 
   Widget _buildFooterButtons() {
@@ -249,12 +330,15 @@ class _AnimationPageState extends State<AnimationPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(253, 246, 222, 1.000),
+      key: _scaffoldKey,
+      backgroundColor: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: AppBar(
-          backgroundColor: const Color.fromRGBO(253, 246, 222, 1.000),
+          backgroundColor: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
           actions: [
             IconButton(
               onPressed: () {
@@ -278,14 +362,24 @@ class _AnimationPageState extends State<AnimationPage> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return Container(
-                padding: const EdgeInsets.only(left: 10, right: 20),
+                padding: const EdgeInsets.only(left: 45, right: 45),
                 child: SizedBox.expand(
                   child: FittedBox(
                     fit: BoxFit.fill,
                     child: SizedBox(
                       width: _controller.value.size.width,
                       height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
+                      child: isDarkMode
+                          ? ColorFiltered(
+                              colorFilter: const ColorFilter.matrix([
+                                -1, 0, 0, 0, 255, // Red
+                                0, -1, 0, 0, 255, // Green
+                                0, -0.25, -1, 0, 255, // Blue
+                                0, 0, 0, 1, 0, // Alpha
+                              ]),
+                              child: VideoPlayer(_controller),
+                            )
+                          : VideoPlayer(_controller),
                     ),
                   ),
                 ),
@@ -299,15 +393,17 @@ class _AnimationPageState extends State<AnimationPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(20),
-        color: const Color.fromRGBO(253, 246, 222, 1.000),
+        // top 10 padding, bottom 10 padding, left 20 padding, right 20 padding
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        color: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
         child: _buildFooterButtons(),
+      ),
+      endDrawer: Drawer(
+        child: _buildDrawerContent(),
       ),
     );
   }
 }
-
-
 
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
