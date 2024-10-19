@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:the_bridge_app/global_helpers.dart';
 
 import 'package:the_bridge_app/providers/feedback_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
@@ -45,23 +46,7 @@ class MyApp extends StatelessWidget {
                 seedColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
                 brightness: settingsProvider.darkMode ? Brightness.dark : Brightness.light,
               ),
-              textTheme: TextTheme(
-                displayLarge: TextStyle(fontSize: settingsProvider.textSize + 4),
-                displayMedium: TextStyle(fontSize: settingsProvider.textSize),
-                displaySmall: TextStyle(fontSize: settingsProvider.textSize - 4),
-                headlineLarge: TextStyle(fontSize: settingsProvider.textSize + 2),
-                headlineMedium: TextStyle(fontSize: settingsProvider.textSize),
-                headlineSmall: TextStyle(fontSize: settingsProvider.textSize - 2),
-                titleLarge: TextStyle(fontSize: settingsProvider.textSize + 2),
-                titleMedium: TextStyle(fontSize: settingsProvider.textSize),
-                titleSmall: TextStyle(fontSize: settingsProvider.textSize - 2),
-                bodyLarge: TextStyle(fontSize: settingsProvider.textSize + 2),
-                bodyMedium: TextStyle(fontSize: settingsProvider.textSize),
-                bodySmall: TextStyle(fontSize: settingsProvider.textSize - 2),
-                labelLarge: TextStyle(fontSize: settingsProvider.textSize + 2),
-                labelMedium: TextStyle(fontSize: settingsProvider.textSize),
-                labelSmall: TextStyle(fontSize: settingsProvider.textSize - 2),
-              ),
+              textTheme: buildTextTheme(settingsProvider.textSize),
               useMaterial3: true,
             ),
             home: const HomePage(),
