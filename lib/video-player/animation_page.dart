@@ -311,9 +311,9 @@ class _AnimationPageState extends State<AnimationPage> {
                       child: isDarkMode
                           ? ColorFiltered(
                               colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 255, // Red
-                                0, -1, 0, 0, 255, // Green
-                                0, -0.25, -1, 0, 255, // Blue
+                                -1, 0, 0, 0, 230, // Red
+                                0, -1, 0, 0, 230, // Green
+                                0, -0.236, -1, 0, 255, // Blue
                                 0, 0, 0, 1, 0, // Alpha
                               ]),
                               child: VideoPlayer(_controller),
