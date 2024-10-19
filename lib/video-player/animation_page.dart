@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:the_bridge_app/models/note.dart';
+import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import 'consts.dart';
-
-class Step {
-  final String videoPath; // Path to the video file for this step
-  final List<String>? verses; // List of related verses for this step
-  final String info; // Additional information for this step
-  final String additionalText; // Additional text for this step
-  final String additionalDialogMessage; // Dialog message for this step
-
-  Step({
-    required this.videoPath,
-    required this.verses,
-    required this.info,
-    required this.additionalText,
-    required this.additionalDialogMessage,
-  });
-}
 
 Future<void> shareFiles() async {
   final ByteData byteData = await rootBundle.load('assets/bridge_diagram.png');
@@ -35,6 +22,13 @@ Future<void> shareFiles() async {
 
   final List<XFile> files = [XFile(file.path)];
   Share.shareXFiles(files, fileNameOverrides: ['bridge_diagram.png']);
+}
+
+String formatTimestamp(DateTime dateTime) {
+  // Format the DateTime object to a human-readable string
+  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+
+  return formattedDate;
 }
 
 class AnimationPage extends StatefulWidget {
@@ -150,6 +144,14 @@ class _AnimationPageState extends State<AnimationPage> {
     context.read<PassagesProvider>().fetchPassages(verse);
   }
 
+  void _getNotes() {
+    context.read<NotesProvider>().fetchNotes();
+  }
+
+  void _getNotesForCurrentStep() {
+    context.read<NotesProvider>().fetchAllByStepId(_currentStep);
+  }
+
   void _showVerses() {
     _getVerse(steps[_currentStep].verses!.join(' '));
     setState(() {
@@ -161,6 +163,15 @@ class _AnimationPageState extends State<AnimationPage> {
   void _showAdditionalInfo() {
     setState(() {
       _drawerContent = 'additionalInfo';
+    });
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  bool _showGlobalNotes = true; // Toggle between global and step-specific notes
+  void _showNotes() {
+    _showGlobalNotes ? _getNotes() : _getNotesForCurrentStep();
+    setState(() {
+      _drawerContent = 'notes';
     });
     _scaffoldKey.currentState?.openEndDrawer();
   }
@@ -229,8 +240,140 @@ class _AnimationPageState extends State<AnimationPage> {
           child: Text(steps[_currentStep].additionalDialogMessage),
         ),
       );
+    } else if (_drawerContent == 'notes') {
+      return Consumer<NotesProvider>(
+        builder: (context, notesProvider, child) {
+          List<Note> notesToShow = _showGlobalNotes ? notesProvider.notes : notesProvider.notes.where((note) => note.step == _currentStep).toList();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: const Text('Notes'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Switch(
+                      value: _showGlobalNotes,
+                      onChanged: (value) {
+                        setState(() {
+                          _showGlobalNotes = value;
+                          _showNotes(); // Refresh the notes list
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _showAddNoteDialog,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: notesToShow.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: notesToShow.length,
+                        itemBuilder: (context, index) {
+                          final note = notesToShow[index];
+                          return Dismissible(
+                            key: Key(note.id.toString()),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) {
+                              context.read<NotesProvider>().deleteNoteById(note.id!);
+                            },
+                            background: Container(color: Colors.red),
+                            child: ListTile(
+                              title: Text(note.content),
+                              subtitle: Text('${steps[note.step].additionalText} - ${formatTimestamp(note.timestamp)}'),
+                              onTap: () {
+                                _showEditNoteDialog(note);
+                              },
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(child: Text('No notes available')),
+              ),
+            ],
+          );
+        },
+      );
     }
     return Container();
+  }
+
+  void _showAddNoteDialog() {
+    TextEditingController noteController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Note'),
+          content: TextField(
+            controller: noteController,
+            decoration: const InputDecoration(hintText: 'Enter your note here'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (noteController.text.isNotEmpty) {
+                  final newNote = Note(
+                    content: noteController.text,
+                    step: _currentStep,
+                    timestamp: DateTime.now(),
+                  );
+                  context.read<NotesProvider>().addNote(newNote);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditNoteDialog(Note note) {
+    TextEditingController noteController = TextEditingController(text: note.content);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Note'),
+          content: TextField(
+            controller: noteController,
+            decoration: const InputDecoration(hintText: 'Edit your note here'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (noteController.text.isNotEmpty) {
+                  note.content = noteController.text;
+                  context.read<NotesProvider>().updateNoteContent(note);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildFooterButtons() {
@@ -279,6 +422,18 @@ class _AnimationPageState extends State<AnimationPage> {
         child: AppBar(
           backgroundColor: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
           actions: [
+            IconButton(
+              onPressed: () {
+                _showNotes();
+              },
+              icon: const Icon(Icons.note_add),
+            ),
+            IconButton(
+              onPressed: () {
+                shareFiles();
+              },
+              icon: const Icon(Icons.draw),
+            ),
             IconButton(
               onPressed: () {
                 shareFiles();

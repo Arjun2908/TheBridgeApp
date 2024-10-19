@@ -49,6 +49,15 @@ class DatabaseHelper {
     });
   }
 
+  Future<List<Note>> getNotesByStepId(int stepId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('notes', where: 'step = ?', whereArgs: [stepId]);
+
+    return List.generate(maps.length, (i) {
+      return Note.fromMap(maps[i]);
+    });
+  }
+
   Future<void> deleteNote(int id) async {
     final db = await database;
     await db.delete('notes', where: 'id = ?', whereArgs: [id]);

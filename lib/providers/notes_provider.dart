@@ -13,6 +13,11 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchAllByStepId(int stepId) async {
+    _notes = await _dbHelper.getNotesByStepId(stepId);
+    notifyListeners();
+  }
+
   Future<void> addNote(Note note) async {
     await _dbHelper.insertNote(note);
     await fetchNotes();
