@@ -101,9 +101,9 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16.0),
                 child: ListTile(
-                  title: const Text('Reset to Default'),
+                  title: const Text('Reset to defaults'),
                   onTap: () {
                     showDialog(
                       context: context,

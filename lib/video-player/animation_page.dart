@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
@@ -61,6 +62,7 @@ class _AnimationPageState extends State<AnimationPage> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
     _loadVideoForStep(_currentStep);
+    FToastBuilder();
   }
 
   void _loadVideoForStep(int stepIndex) {
@@ -261,23 +263,60 @@ class _AnimationPageState extends State<AnimationPage> {
 
   Widget _buildDrawerContent() {
     if (_drawerContent == 'verses') {
-      return Consumer<PassagesProvider>(
-        builder: (context, passageProvider, child) {
-          if (passageProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (passageProvider.passages != null) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
-                child: Text(
-                  passageProvider.passages!.map((passage) => passage.text).join('\n\n'),
-                ),
-              ),
-            );
-          }
-          return const Center(child: Text('Enter a passage to fetch'));
-        },
+      return Stack(
+        children: [
+          Consumer<PassagesProvider>(
+            builder: (context, passageProvider, child) {
+              if (passageProvider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (passageProvider.passages != null) {
+                final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+                    child: Text(versesText),
+                  ),
+                );
+              }
+              return const Center(child: Text('Enter a passage to fetch'));
+            },
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.ios_share),
+              onPressed: () async {
+                var toast = FToast();
+                toast.init(context);
+                final passageProvider = context.read<PassagesProvider>();
+                if (passageProvider.passages != null) {
+                  final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
+                  final shareText = '$versesText\n\nShared from The Bridge App';
+                  await Share.share(shareText);
+                  toast.showToast(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25.0),
+                        color: Colors.black54,
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check, color: Colors.white),
+                          SizedBox(width: 12.0),
+                          Text('Verses shared successfully', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
       );
     } else if (_drawerContent == 'additionalInfo') {
       return SingleChildScrollView(

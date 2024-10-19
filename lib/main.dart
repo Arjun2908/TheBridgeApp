@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/providers/feedback_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
@@ -56,6 +56,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
           return MaterialApp(
+            builder: FToastBuilder(),
             title: 'Bridge Diagram Tutorial',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
