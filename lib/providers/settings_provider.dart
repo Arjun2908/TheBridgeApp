@@ -1,3 +1,4 @@
+// lib/providers/settings_provider.dart
 import 'package:flutter/material.dart';
 import '../services/settings_service.dart';
 
@@ -5,25 +6,25 @@ class SettingsProvider with ChangeNotifier {
   final SettingsService _settingsService = SettingsService();
   bool _darkMode = false;
   double _textSize = 16.0;
-  String _themeColor = 'green';
+  String _themeColorHex = '#00FF00'; // Default to green
 
   bool get darkMode => _darkMode;
   double get textSize => _textSize;
-  String get themeColor => _themeColor;
+  String get themeColorHex => _themeColorHex;
 
   void loadSettings() {
     final settings = _settingsService.loadSettings();
     _darkMode = settings[SettingsService.darkModeKey];
     _textSize = settings[SettingsService.textSizeKey];
-    _themeColor = settings[SettingsService.themeColorKey];
+    _themeColorHex = settings[SettingsService.themeColorHexKey];
     notifyListeners();
   }
 
-  Future<void> updateSettings(bool darkMode, double textSize, String themeColor) async {
+  Future<void> updateSettings(bool darkMode, double textSize, String themeColorHex) async {
     _darkMode = darkMode;
     _textSize = textSize;
-    _themeColor = themeColor;
-    await _settingsService.saveSettings(darkMode, textSize, themeColor);
+    _themeColorHex = themeColorHex;
+    await _settingsService.saveSettings(darkMode, textSize, themeColorHex);
     notifyListeners();
   }
 

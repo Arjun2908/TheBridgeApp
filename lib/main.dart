@@ -58,7 +58,10 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Bridge Diagram Tutorial',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: getColorFromName(settingsProvider.themeColor), brightness: settingsProvider.darkMode ? Brightness.dark : Brightness.light),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
+                brightness: settingsProvider.darkMode ? Brightness.dark : Brightness.light,
+              ),
               textTheme: TextTheme(
                 displayLarge: TextStyle(fontSize: settingsProvider.textSize + 4),
                 displayMedium: TextStyle(fontSize: settingsProvider.textSize),

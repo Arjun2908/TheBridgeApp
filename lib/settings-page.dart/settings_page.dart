@@ -1,32 +1,10 @@
+// lib/settings-page.dart/settings_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/feedback_page.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 import '../providers/settings_provider.dart';
-
-double getTextSize(String textSize) {
-  switch (textSize) {
-    case 'Small':
-      return 12.0;
-    case 'Medium':
-      return 16.0;
-    case 'Large':
-      return 20.0;
-    default:
-      return 16.0;
-  }
-}
-
-String getTextSizeString(double textSize) {
-  if (textSize == 12.0) {
-    return 'Small';
-  } else if (textSize == 16.0) {
-    return 'Medium';
-  } else if (textSize == 20.0) {
-    return 'Large';
-  } else {
-    return 'Medium';
-  }
-}
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -48,7 +26,7 @@ class SettingsPage extends StatelessWidget {
                       title: const Text('Dark Mode'),
                       value: settingsProvider.darkMode,
                       onChanged: (bool value) {
-                        settingsProvider.updateSettings(value, settingsProvider.textSize, settingsProvider.themeColor);
+                        settingsProvider.updateSettings(value, settingsProvider.textSize, settingsProvider.themeColorHex);
                       },
                     ),
                     ListTile(
@@ -57,7 +35,7 @@ class SettingsPage extends StatelessWidget {
                         value: getTextSizeString(settingsProvider.textSize),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
-                            settingsProvider.updateSettings(settingsProvider.darkMode, getTextSize(newValue), settingsProvider.themeColor);
+                            settingsProvider.updateSettings(settingsProvider.darkMode, getTextSize(newValue), settingsProvider.themeColorHex);
                           }
                         },
                         items: <String>['Small', 'Medium', 'Large'].map<DropdownMenuItem<String>>((String value) {
@@ -70,19 +48,45 @@ class SettingsPage extends StatelessWidget {
                     ),
                     ListTile(
                       title: const Text('Theme Color'),
-                      trailing: DropdownButton<String>(
-                        value: settingsProvider.themeColor,
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            settingsProvider.updateSettings(settingsProvider.darkMode, settingsProvider.textSize, newValue);
-                          }
-                        },
-                        items: <String>['blue', 'green', 'red', 'purple', 'orange'].map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
+                      trailing: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Pick a color'),
+                                content: SingleChildScrollView(
+                                  child: ColorPicker(
+                                    pickerColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
+                                    onColorChanged: (Color color) {
+                                      settingsProvider.updateSettings(
+                                        settingsProvider.darkMode,
+                                        settingsProvider.textSize,
+                                        '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+                                      );
+                                    },
+                                  ),
+                                ),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                    child: const Text('Got it'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           );
-                        }).toList(),
+                        },
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                       ),
                     ),
                     ListTile(
@@ -131,5 +135,30 @@ class SettingsPage extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+double getTextSize(String textSize) {
+  switch (textSize) {
+    case 'Small':
+      return 12.0;
+    case 'Medium':
+      return 16.0;
+    case 'Large':
+      return 20.0;
+    default:
+      return 16.0;
+  }
+}
+
+String getTextSizeString(double textSize) {
+  if (textSize == 12.0) {
+    return 'Small';
+  } else if (textSize == 16.0) {
+    return 'Medium';
+  } else if (textSize == 20.0) {
+    return 'Large';
+  } else {
+    return 'Medium';
   }
 }
