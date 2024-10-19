@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/providers/feedback_provider.dart';
@@ -17,7 +18,6 @@ void main() async {
   await Hive.openBox('settings');
   await dotenv.load(fileName: ".env");
 
-  // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]).then((value) => runApp(const MyApp()));
   runApp(const MyApp());
 }
 
@@ -113,28 +113,62 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Bridge Diagram Tutorial')),
+      appBar: AppBar(title: const Text('The Bridge App')),
       body: Stack(
         children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: isDarkMode
+                  ? ColorFiltered(
+                      colorFilter: const ColorFilter.matrix([
+                        -1, 0, 0, 0, 255, // Red
+                        0, -1, 0, 0, 255, // Green
+                        0, 0, -1, 0, 255, // Blue
+                        0, 0, 0, 1, 0, // Alpha
+                      ]),
+                      child: Image.asset(
+                        'assets/home.png',
+                        fit: BoxFit.contain,
+                        height: double.infinity,
+                        width: double.infinity,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/home.png',
+                      fit: BoxFit.contain,
+                      height: double.infinity,
+                      width: double.infinity,
+                    ),
+            ),
+          ),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/video');
-                  },
-                  child: const Text('Video Tutorial'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/main');
-                  },
-                  child: const Text('Walkthough'),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 128),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/video');
+                    },
+                    child: const Text('Video Tutorial'),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/main');
+                    },
+                    child: const Text('Walkthough'),
+                  ),
+                ],
+              ),
             ),
           ),
           Align(
