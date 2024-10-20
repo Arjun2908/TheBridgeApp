@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:the_bridge_app/about/about_page.dart';
+import 'package:the_bridge_app/home/home_page.dart';
+import 'package:the_bridge_app/notes/notes_page.dart';
+import 'package:the_bridge_app/settings/settings_page.dart';
 
 TextTheme buildTextTheme(double textSize) {
   return TextTheme(
@@ -17,5 +21,41 @@ TextTheme buildTextTheme(double textSize) {
     labelLarge: TextStyle(fontSize: textSize + 2),
     labelMedium: TextStyle(fontSize: textSize),
     labelSmall: TextStyle(fontSize: textSize - 2),
+  );
+}
+
+// Navigation functionality
+void onItemTapped(int index, BuildContext context) {
+  Widget page;
+  switch (index) {
+    case 0:
+      page = const HomePage();
+      break;
+    case 1:
+      page = const NotesPage();
+      break;
+    case 2:
+      page = const SettingsPage();
+      break;
+    case 3:
+      page = const AboutPage();
+      break;
+    case 4:
+      Navigator.pushNamed(context, '/video');
+      return;
+    case 5:
+      Navigator.pushNamed(context, '/main');
+      return;
+    default:
+      return;
+  }
+
+  Navigator.pushReplacement(
+    context,
+    PageRouteBuilder(
+      pageBuilder: (context, animation1, animation2) => page,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    ),
   );
 }

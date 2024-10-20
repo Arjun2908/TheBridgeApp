@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:the_bridge_app/bottom_nav_bar.dart';
+import 'package:the_bridge_app/global_helpers.dart';
 
 import 'package:the_bridge_app/providers/settings_provider.dart';
 
@@ -18,7 +20,7 @@ class AboutPage extends StatelessWidget {
           title: const Text('About'),
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 36),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,6 +102,10 @@ class AboutPage extends StatelessWidget {
               ],
             ),
           ),
+        ),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: 3,
+          onItemTapped: (index) => onItemTapped(index, context),
         ),
       );
     });

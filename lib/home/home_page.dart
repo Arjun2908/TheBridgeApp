@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:the_bridge_app/bottom_nav_bar.dart';
+import 'package:the_bridge_app/global_helpers.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,51 +57,29 @@ class _HomePageState extends State<HomePage> {
           ),
           Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 128),
+              padding: const EdgeInsets.only(top: 250),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/video');
-                    },
+                    onPressed: () => onItemTapped(4, context),
                     child: const Text('Video Tutorial'),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/main');
-                    },
+                    onPressed: () => onItemTapped(5, context),
                     child: const Text('Walkthough'),
                   ),
                 ],
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: IconButton(
-              iconSize: 35,
-              padding: const EdgeInsets.all(30),
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.pushNamed(context, '/settings');
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: IconButton(
-              iconSize: 35,
-              padding: const EdgeInsets.all(30),
-              icon: const Icon(Icons.info),
-              onPressed: () {
-                Navigator.pushNamed(context, '/about');
-              },
-            ),
-          ),
         ],
+      ),
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 0,
+        onItemTapped: (index) => onItemTapped(index, context),
       ),
     );
   }

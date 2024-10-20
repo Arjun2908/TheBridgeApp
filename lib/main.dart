@@ -4,8 +4,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/global_helpers.dart';
+import 'package:the_bridge_app/notes/notes_page.dart';
 
 import 'package:the_bridge_app/providers/feedback_provider.dart';
+import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:the_bridge_app/providers/settings_provider.dart';
 
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PassagesProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
         ChangeNotifierProvider(create: (_) => FeedbackProvider()),
+        ChangeNotifierProvider(create: (_) => NotesProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
               '/video': (context) => const VideoPage(),
               '/settings': (context) => const SettingsPage(),
               '/about': (context) => const AboutPage(),
+              '/notes': (context) => const NotesPage(),
             },
           );
         },
