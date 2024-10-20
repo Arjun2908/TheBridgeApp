@@ -17,6 +17,7 @@ class _NotesPageState extends State<NotesPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   DateTimeRange? _dateRange;
+
   @override
   void initState() {
     super.initState();
@@ -93,80 +94,85 @@ class _NotesPageState extends State<NotesPage> {
               ),
             ),
           ),
-          body: notesProvider.notes.isEmpty
-              ? const Center(child: Text('No notes available'))
-              : ListView.builder(
-                  itemCount: notesProvider.notes.length,
-                  itemBuilder: (context, index) {
-                    List<Note> filteredNotes = notesProvider.notes.where((note) {
-                      bool matchesSearch = note.content.toLowerCase().contains(_searchQuery.toLowerCase());
-                      bool matchesDate = _dateRange == null || (note.timestamp.isAfter(_dateRange!.start) && note.timestamp.isBefore(_dateRange!.end.add(const Duration(days: 1))));
+          body: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: notesProvider.notes.isEmpty
+                ? const Center(child: Text('No notes available'))
+                : ListView.builder(
+                    itemCount: notesProvider.notes.length,
+                    itemBuilder: (context, index) {
+                      List<Note> filteredNotes = notesProvider.notes.where((note) {
+                        bool matchesSearch = note.content.toLowerCase().contains(_searchQuery.toLowerCase());
+                        bool matchesDate = _dateRange == null || (note.timestamp.isAfter(_dateRange!.start) && note.timestamp.isBefore(_dateRange!.end.add(const Duration(days: 1))));
 
-                      return matchesSearch && matchesDate;
-                    }).toList();
+                        return matchesSearch && matchesDate;
+                      }).toList();
 
-                    if (filteredNotes.isEmpty) {
-                      return Container();
-                    }
+                      if (filteredNotes.isEmpty) {
+                        return Container();
+                      }
 
-                    final note = filteredNotes[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      elevation: 3,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      child: ListTile(
-                        title: Text(
-                          note.content,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                      final note = filteredNotes[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
                         ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Text(
-                                'Step: ${steps[note.step].additionalText}',
+                        elevation: 3,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        child: ListTile(
+                          title: Text(
+                            note.content,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Text(
+                                  'Step: ${steps[note.step].additionalText}',
+                                ),
+                                Text(
+                                  formatTimestamp(note.timestamp),
+                                  style: TextStyle(color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          trailing: PopupMenuButton(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _showEditNoteDialog(note);
+                              } else if (value == 'delete') {
+                                context.read<NotesProvider>().deleteNoteById(note.id!);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: ListTile(
+                                  leading: Icon(Icons.edit),
+                                  title: Text('Edit'),
+                                ),
                               ),
-                              Text(
-                                formatTimestamp(note.timestamp),
-                                style: TextStyle(color: Colors.grey.shade600),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: ListTile(
+                                  leading: Icon(Icons.delete),
+                                  title: Text('Delete'),
+                                ),
                               ),
                             ],
                           ),
+                          onTap: () => _showEditNoteDialog(note),
                         ),
-                        trailing: PopupMenuButton(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _showEditNoteDialog(note);
-                            } else if (value == 'delete') {
-                              context.read<NotesProvider>().deleteNoteById(note.id!);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: ListTile(
-                                leading: Icon(Icons.edit),
-                                title: Text('Edit'),
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: ListTile(
-                                leading: Icon(Icons.delete),
-                                title: Text('Delete'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        onTap: () => _showEditNoteDialog(note),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+          ),
           bottomNavigationBar: BottomNavBar(
             selectedIndex: 1, // Adjust index based on your setup
             onItemTapped: (index) => onItemTapped(index, context),
