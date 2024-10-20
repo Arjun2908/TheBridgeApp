@@ -194,31 +194,52 @@ class _NotesPageState extends State<NotesPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Note'),
-          content: TextField(
-            controller: noteController,
-            focusNode: focusNode,
-            decoration: const InputDecoration(hintText: 'Edit your note here'),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            width: MediaQuery.of(context).size.width * 0.9, // Adjust the width as needed
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Edit Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: noteController,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    hintText: 'Edit your note here',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 5,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (noteController.text.isNotEmpty) {
+                          note.content = noteController.text;
+                          context.read<NotesProvider>().updateNoteContent(note);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                if (noteController.text.isNotEmpty) {
-                  note.content = noteController.text;
-                  context.read<NotesProvider>().updateNoteContent(note);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
+          ),
         );
       },
     ).then((_) {

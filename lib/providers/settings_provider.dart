@@ -6,7 +6,7 @@ class SettingsProvider with ChangeNotifier {
   final SettingsService _settingsService = SettingsService();
   bool _darkMode = false;
   double _textSize = 16.0;
-  String _themeColorHex = '#00FF00'; // Default to green
+  String _themeColorHex = '#FFFFFF'; // Default to green
 
   bool get darkMode => _darkMode;
   double get textSize => _textSize;

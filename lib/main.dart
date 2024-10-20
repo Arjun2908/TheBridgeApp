@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             builder: FToastBuilder(),
             title: 'Bridge Diagram Tutorial',
+            debugShowCheckedModeBanner: false,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),

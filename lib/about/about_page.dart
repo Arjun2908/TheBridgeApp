@@ -49,29 +49,32 @@ class AboutPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Features:',
-                          style: TextStyle(fontSize: getTitleTextSize(settingsProvider.textSize), fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '- Interactive video tutorial (coming soon)\n'
-                          '- Step-by-step walkthroughs\n'
-                          '- Drawing canvas for annotations (coming soon) \n'
-                          '- Export and share features',
-                          style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize)),
-                        ),
-                      ],
+                SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Features:',
+                            style: TextStyle(fontSize: getTitleTextSize(settingsProvider.textSize), fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '- Interactive video tutorial (coming soon)\n'
+                            '- Step-by-step walkthroughs\n'
+                            '- Drawing canvas for annotations (coming soon) \n'
+                            '- Export and share features',
+                            style: TextStyle(fontSize: getBodyTextSize(settingsProvider.textSize)),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

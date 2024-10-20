@@ -22,6 +22,7 @@ class SettingsService {
   }
 
   Future<void> resetToDefault() async {
-    await saveSettings(false, 16.0, '#00FF00');
+    // translate 255,255,255 to hex  - #FFFFFF
+    await saveSettings(false, 16.0, '#FFFFFF');
   }
 }

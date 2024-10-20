@@ -8,6 +8,8 @@ import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scribble/scribble.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:the_bridge_app/global_helpers.dart';
 import 'dart:io';
 
@@ -41,6 +43,8 @@ class _AnimationPageState extends State<AnimationPage> {
   Future<void>? _initializePrevVideoPlayerFuture;
   int _currentStep = 0;
   String _drawerContent = '';
+  final ScribbleNotifier _scribbleNotifier = ScribbleNotifier();
+  bool showScribble = false;
 
   @override
   void initState() {
@@ -50,6 +54,39 @@ class _AnimationPageState extends State<AnimationPage> {
 
     _loadVideoForStep(_currentStep);
     FToastBuilder();
+  }
+
+  Widget _buildDrawingToolbar() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: 40),
+        IconButton(
+          icon: const Icon(Icons.undo),
+          onPressed: _scribbleNotifier.undo,
+        ),
+        IconButton(
+          icon: const Icon(Icons.redo),
+          onPressed: _scribbleNotifier.redo,
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: _scribbleNotifier.clear,
+        ),
+        IconButton(
+          icon: const Icon(Icons.brush),
+          onPressed: () {
+            _scribbleNotifier.setColor(Colors.black); // Use brush
+          },
+        ),
+        IconButton(
+          icon: const Icon(MaterialCommunityIcons.eraser),
+          onPressed: () {
+            _scribbleNotifier.setEraser(); // Use eraser
+          },
+        ),
+      ],
+    );
   }
 
   void _loadVideoForStep(int stepIndex) {
@@ -78,6 +115,7 @@ class _AnimationPageState extends State<AnimationPage> {
     _controller.dispose();
     _nextController?.dispose();
     _prevController?.dispose();
+    _scribbleNotifier.dispose();
     super.dispose();
   }
 
@@ -181,51 +219,55 @@ class _AnimationPageState extends State<AnimationPage> {
               if (passageProvider.passages != null) {
                 final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
                 return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      versesText,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        title: const Text('Verses', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.ios_share),
+                          onPressed: () async {
+                            var toast = FToast();
+                            toast.init(context);
+                            final passageProvider = context.read<PassagesProvider>();
+                            if (passageProvider.passages != null) {
+                              final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
+                              final shareText = '$versesText\n\nShared from The Bridge App';
+                              await Share.share(shareText);
+                              toast.showToast(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    color: Colors.black54,
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check, color: Colors.white),
+                                      SizedBox(width: 12.0),
+                                      Text('Verses shared successfully', style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          versesText,
+                          style: const TextStyle(fontSize: 16, height: 1.5),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }
               return const Center(child: Text('Enter a passage to fetch'));
             },
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: IconButton(
-              icon: const Icon(Icons.ios_share),
-              onPressed: () async {
-                var toast = FToast();
-                toast.init(context);
-                final passageProvider = context.read<PassagesProvider>();
-                if (passageProvider.passages != null) {
-                  final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
-                  final shareText = '$versesText\n\nShared from The Bridge App';
-                  await Share.share(shareText);
-                  toast.showToast(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25.0),
-                        color: Colors.black54,
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check, color: Colors.white),
-                          SizedBox(width: 12.0),
-                          Text('Verses shared successfully', style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
           ),
         ],
       );
@@ -297,14 +339,14 @@ class _AnimationPageState extends State<AnimationPage> {
               );
             },
           ),
-          Positioned(
-            bottom: 24,
-            right: 24,
-            child: FloatingActionButton(
-              onPressed: _showAddNoteDialog,
-              child: const Icon(Icons.add),
-            ),
-          ),
+          // Positioned(
+          //   bottom: 24,
+          //   right: 24,
+          //   child: FloatingActionButton(
+          //     onPressed: _showAddNoteDialog,
+          //     child: const Icon(Icons.add),
+          //   ),
+          // ),
         ],
       );
     }
@@ -405,17 +447,22 @@ class _AnimationPageState extends State<AnimationPage> {
           child: const Icon(Icons.chevron_left),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ElevatedButton(
-              onPressed: _showVerses,
-              child: const Text('Show Verses'),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _showVerses,
+                  child: const Text('Show Verses'),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _showAdditionalInfo,
+                  child: Text(steps[_currentStep].additionalText),
+                ),
+              ],
             ),
-            const SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: _showAdditionalInfo,
-              child: Text(steps[_currentStep].additionalText),
-            ),
+            if (showScribble) _buildDrawingToolbar(),
           ],
         ),
         ElevatedButton(
@@ -446,7 +493,9 @@ class _AnimationPageState extends State<AnimationPage> {
             ),
             IconButton(
               onPressed: () {
-                shareFiles();
+                setState(() {
+                  showScribble = !showScribble;
+                });
               },
               icon: const Icon(Icons.draw),
             ),
@@ -479,17 +528,33 @@ class _AnimationPageState extends State<AnimationPage> {
                     child: SizedBox(
                       width: _controller.value.size.width,
                       height: _controller.value.size.height,
-                      child: isDarkMode
-                          ? ColorFiltered(
-                              colorFilter: const ColorFilter.matrix([
-                                -1, 0, 0, 0, 230, // Red
-                                0, -1, 0, 0, 230, // Green
-                                0, -0.236, -1, 0, 255, // Blue
-                                0, 0, 0, 1, 0, // Alpha
-                              ]),
-                              child: VideoPlayer(_controller),
-                            )
-                          : VideoPlayer(_controller),
+                      child: Stack(
+                        children: [
+                          isDarkMode
+                              ? ColorFiltered(
+                                  colorFilter: const ColorFilter.matrix([
+                                    -1, 0, 0, 0, 230, // Red
+                                    0, -1, 0, 0, 230, // Green
+                                    0, -0.236, -1, 0, 255, // Blue
+                                    0, 0, 0, 1, 0, // Alpha
+                                  ]),
+                                  child: VideoPlayer(_controller),
+                                )
+                              : VideoPlayer(_controller),
+                          if (showScribble)
+                            isDarkMode
+                                ? ColorFiltered(
+                                    colorFilter: const ColorFilter.matrix([
+                                      -1, 0, 0, 0, 230, // Red
+                                      0, -1, 0, 0, 230, // Green
+                                      0, -0.236, -1, 0, 255, // Blue
+                                      0, 0, 0, 1, 0, // Alpha
+                                    ]),
+                                    child: Scribble(notifier: _scribbleNotifier, drawPen: true),
+                                  )
+                                : Scribble(notifier: _scribbleNotifier, drawPen: true),
+                        ],
+                      ),
                     ),
                   ),
                 ),
