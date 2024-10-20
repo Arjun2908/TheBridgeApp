@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:the_bridge_app/about/about_page.dart';
 import 'package:the_bridge_app/home/home_page.dart';
 import 'package:the_bridge_app/notes/notes_page.dart';
@@ -22,6 +23,13 @@ TextTheme buildTextTheme(double textSize) {
     labelMedium: TextStyle(fontSize: textSize),
     labelSmall: TextStyle(fontSize: textSize - 2),
   );
+}
+
+String formatTimestamp(DateTime dateTime) {
+  // Format the DateTime object to a human-readable string
+  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+
+  return formattedDate;
 }
 
 // Navigation functionality

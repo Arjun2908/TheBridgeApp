@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:the_bridge_app/models/note.dart';
@@ -9,6 +8,7 @@ import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:the_bridge_app/global_helpers.dart';
 import 'dart:io';
 
 import 'consts.dart';
@@ -22,13 +22,6 @@ Future<void> shareFiles() async {
 
   final List<XFile> files = [XFile(file.path)];
   Share.shareXFiles(files, fileNameOverrides: ['bridge_diagram.png']);
-}
-
-String formatTimestamp(DateTime dateTime) {
-  // Format the DateTime object to a human-readable string
-  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
-
-  return formattedDate;
 }
 
 class AnimationPage extends StatefulWidget {
