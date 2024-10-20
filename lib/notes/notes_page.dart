@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/bottom_nav_bar.dart';
-import 'package:the_bridge_app/video-player/consts.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'package:the_bridge_app/global_helpers.dart';
@@ -55,6 +54,8 @@ class _NotesPageState extends State<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Consumer<NotesProvider>(
       builder: (context, notesProvider, child) {
         if (notesProvider.notes.isEmpty) {
@@ -80,7 +81,7 @@ class _NotesPageState extends State<NotesPage> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.grey.shade200,
+                        fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
                         hintText: 'Search Notes...',
                         prefixIcon: const Icon(Icons.search),
                         border: OutlineInputBorder(
@@ -117,61 +118,65 @@ class _NotesPageState extends State<NotesPage> {
                       final note = filteredNotes[index];
                       return Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(16.0),
                         ),
                         elevation: 3,
                         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        child: ListTile(
-                          title: Text(
-                            note.content,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Text(
-                                  'Step: ${steps[note.step].additionalText}',
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: ListTile(
+                            title: Text(
+                              note.content,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Text(
+                                    formatTimestamp(note.timestamp),
+                                    style: TextStyle(color: Colors.grey.shade600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            trailing: PopupMenuButton(
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  _showEditNoteDialog(note);
+                                } else if (value == 'delete') {
+                                  context.read<NotesProvider>().deleteNoteById(note.id!);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: ListTile(
+                                    leading: Icon(Icons.edit),
+                                    title: Text('Edit'),
+                                  ),
                                 ),
-                                Text(
-                                  formatTimestamp(note.timestamp),
-                                  style: TextStyle(color: Colors.grey.shade600),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: ListTile(
+                                    leading: Icon(Icons.delete),
+                                    title: Text('Delete'),
+                                  ),
                                 ),
                               ],
                             ),
+                            onTap: () => _showEditNoteDialog(note),
                           ),
-                          trailing: PopupMenuButton(
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _showEditNoteDialog(note);
-                              } else if (value == 'delete') {
-                                context.read<NotesProvider>().deleteNoteById(note.id!);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'edit',
-                                child: ListTile(
-                                  leading: Icon(Icons.edit),
-                                  title: Text('Edit'),
-                                ),
-                              ),
-                              const PopupMenuItem(
-                                value: 'delete',
-                                child: ListTile(
-                                  leading: Icon(Icons.delete),
-                                  title: Text('Delete'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () => _showEditNoteDialog(note),
                         ),
                       );
                     },
                   ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _showAddNoteDialog,
+            child: const Icon(Icons.add),
           ),
           bottomNavigationBar: BottomNavBar(
             selectedIndex: 1, // Adjust index based on your setup
@@ -214,6 +219,74 @@ class _NotesPageState extends State<NotesPage> {
               child: const Text('Save'),
             ),
           ],
+        );
+      },
+    ).then((_) {
+      focusNode.dispose();
+    });
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      focusNode.requestFocus();
+    });
+  }
+
+  void _showAddNoteDialog() {
+    TextEditingController noteController = TextEditingController();
+    FocusNode focusNode = FocusNode();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            width: MediaQuery.of(context).size.width * 0.9, // Adjust the width as needed
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Add Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: noteController,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter your note here',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 5,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (noteController.text.isNotEmpty) {
+                          final newNote = Note(
+                            content: noteController.text,
+                            step: -1,
+                            timestamp: DateTime.now(),
+                          );
+                          context.read<NotesProvider>().addNote(newNote);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     ).then((_) {

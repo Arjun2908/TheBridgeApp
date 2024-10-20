@@ -182,8 +182,11 @@ class _AnimationPageState extends State<AnimationPage> {
                 final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
                 return SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
-                    child: Text(versesText),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      versesText,
+                      style: const TextStyle(fontSize: 16, height: 1.5),
+                    ),
                   ),
                 );
               }
@@ -229,67 +232,80 @@ class _AnimationPageState extends State<AnimationPage> {
     } else if (_drawerContent == 'additionalInfo') {
       return SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
-          child: Text(steps[_currentStep].additionalDialogMessage),
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            steps[_currentStep].additionalDialogMessage,
+            style: const TextStyle(fontSize: 16, height: 1.5),
+          ),
         ),
       );
     } else if (_drawerContent == 'notes') {
-      return Consumer<NotesProvider>(
-        builder: (context, notesProvider, child) {
-          List<Note> notesToShow = _showGlobalNotes ? notesProvider.notes : notesProvider.notes.where((note) => note.step == _currentStep).toList();
+      return Stack(
+        children: [
+          Consumer<NotesProvider>(
+            builder: (context, notesProvider, child) {
+              List<Note> notesToShow = _showGlobalNotes ? notesProvider.notes : notesProvider.notes.where((note) => note.step == _currentStep).toList();
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: const Text('Notes'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Switch(
-                      value: _showGlobalNotes,
-                      onChanged: (value) {
-                        setState(() {
-                          _showGlobalNotes = value;
-                          _showNotes(); // Refresh the notes list
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _showAddNoteDialog,
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: notesToShow.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: notesToShow.length,
-                        itemBuilder: (context, index) {
-                          final note = notesToShow[index];
-                          return Dismissible(
-                            key: Key(note.id.toString()),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (_) {
-                              context.read<NotesProvider>().deleteNoteById(note.id!);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ListTile(
+                    title: Text('Notes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    // trailing: CustomSwitch(
+                    //   value: _showGlobalNotes,
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       _showGlobalNotes = value;
+                    //       _showNotes(); // Refresh the notes list
+                    //     });
+                    //   },
+                    // ),
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: notesToShow.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: notesToShow.length,
+                            itemBuilder: (context, index) {
+                              final note = notesToShow[index];
+                              return Dismissible(
+                                key: Key(note.id.toString()),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (_) {
+                                  context.read<NotesProvider>().deleteNoteById(note.id!);
+                                },
+                                background: Container(color: Colors.red),
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(note.content, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      // subtitle: Text('${steps[note.step].additionalText} - ${formatTimestamp(note.timestamp)}'),
+                                      subtitle: Text(formatTimestamp(note.timestamp)),
+                                      onTap: () {
+                                        _showEditNoteDialog(note);
+                                      },
+                                    ),
+                                    // const Divider(),
+                                  ],
+                                ),
+                              );
                             },
-                            background: Container(color: Colors.red),
-                            child: ListTile(
-                              title: Text(note.content),
-                              subtitle: Text('${steps[note.step].additionalText} - ${formatTimestamp(note.timestamp)}'),
-                              onTap: () {
-                                _showEditNoteDialog(note);
-                              },
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(child: Text('No notes available')),
-              ),
-            ],
-          );
-        },
+                          )
+                        : const Center(child: Text('No notes available')),
+                  ),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            bottom: 24,
+            right: 24,
+            child: FloatingActionButton(
+              onPressed: _showAddNoteDialog,
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ],
       );
     }
     return Container();
@@ -302,10 +318,17 @@ class _AnimationPageState extends State<AnimationPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Note'),
-          content: TextField(
-            controller: noteController,
-            decoration: const InputDecoration(hintText: 'Enter your note here'),
+          title: const Text('Add Note', style: TextStyle(fontSize: 20)),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8, // Make the dialog wider
+            child: TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                hintText: 'Enter your note here',
+                border: InputBorder.none,
+              ),
+              maxLines: 3,
+            ),
           ),
           actions: [
             TextButton(
@@ -491,3 +514,41 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 }
+
+// class CustomSwitch extends StatelessWidget {
+//   final bool value;
+//   final ValueChanged<bool> onChanged;
+
+//   const CustomSwitch({required this.value, required this.onChanged, super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () => onChanged(!value),
+//       child: Container(
+//         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(20.0),
+//           color: value ? Colors.blue : Colors.grey,
+//         ),
+//         child: Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               value ? 'Show All' : 'Show Step',
+//               style: const TextStyle(color: Colors.white),
+//             ),
+//             const SizedBox(width: 8.0),
+//             Switch(
+//               value: value,
+//               onChanged: onChanged,
+//               activeColor: Colors.white,
+//               inactiveThumbColor: Colors.white,
+//               inactiveTrackColor: Colors.grey,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
