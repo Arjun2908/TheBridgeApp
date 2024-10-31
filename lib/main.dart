@@ -10,14 +10,16 @@ import 'package:the_bridge_app/providers/feedback_provider.dart';
 import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:the_bridge_app/providers/settings_provider.dart';
+import 'package:the_bridge_app/resources/providers/resource_provider.dart';
 
 import 'package:the_bridge_app/settings/settings_page.dart';
-import 'package:the_bridge_app/about/about_page.dart';
 import 'package:the_bridge_app/video-player/animation_page.dart';
 import 'package:the_bridge_app/video/video_page.dart';
 import 'package:the_bridge_app/home/home_page.dart';
+import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('settings');
   await dotenv.load(fileName: ".env");
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
         ChangeNotifierProvider(create: (_) => FeedbackProvider()),
         ChangeNotifierProvider(create: (_) => NotesProvider()),
+        ChangeNotifierProvider(create: (_) => ResourceProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
@@ -58,8 +61,8 @@ class MyApp extends StatelessWidget {
               '/main': (context) => const AnimationPage(),
               '/video': (context) => const VideoPage(),
               '/settings': (context) => const SettingsPage(),
-              '/about': (context) => const AboutPage(),
               '/notes': (context) => const NotesPage(),
+              '/resources': (context) => const ResourceLibraryPage(),
             },
           );
         },

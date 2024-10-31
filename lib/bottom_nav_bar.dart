@@ -29,7 +29,7 @@ class BottomNavBar extends StatelessWidget {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.notes),
+          icon: Icon(Icons.note),
           label: 'Notes',
         ),
         BottomNavigationBarItem(
@@ -37,8 +37,8 @@ class BottomNavBar extends StatelessWidget {
           label: 'Settings',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.info),
-          label: 'About',
+          icon: Icon(Icons.library_books),
+          label: 'Resources',
         ),
       ],
     );

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:the_bridge_app/about/about_page.dart';
+
 import 'package:the_bridge_app/home/home_page.dart';
 import 'package:the_bridge_app/notes/notes_page.dart';
+import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
 import 'package:the_bridge_app/settings/settings_page.dart';
 
 TextTheme buildTextTheme(double textSize) {
@@ -46,7 +47,7 @@ void onItemTapped(int index, BuildContext context) {
       page = const SettingsPage();
       break;
     case 3:
-      page = const AboutPage();
+      page = const ResourceLibraryPage();
       break;
     case 4:
       Navigator.pushNamed(context, '/video');
