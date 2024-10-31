@@ -31,6 +31,7 @@ dependencies:
   scribble: ^0.10.0+1
   flutter_vector_icons: ^2.0.0
   url_launcher: ^6.2.5
+  audioplayers: ^5.2.1
 
 
 dev_dependencies:
@@ -55,25 +56,44 @@ flutter:
   assets:
     - assets/bridge_diagram.png
     - assets/home.png
-    - assets/output_step_1.mp4
-    - assets/output_step_2.mp4
-    - assets/output_step_3.mp4
-    - assets/output_step_4.mp4
-    - assets/output_step_5.mp4
-    - assets/output_step_6.mp4
-    - assets/output_step_7.mp4
-    - assets/output_step_8.mp4
-    - assets/output_step_9.mp4
-    - assets/output_step_10.mp4
-    - assets/output_step_11.mp4
-    - assets/output_step_12.mp4
-    - assets/output_step_13.mp4
-    - assets/output_step_14.mp4
-    - assets/output_step_15.mp4
-    - assets/output_step_16.mp4
-    - assets/output_step_17.mp4
-    - assets/output_step_18.mp4
-    - assets/output_step_19.mp4
+    - assets/video/output_step_1.mp4
+    - assets/video/output_step_2.mp4
+    - assets/video/output_step_3.mp4
+    - assets/video/output_step_4.mp4
+    - assets/video/output_step_5.mp4
+    - assets/video/output_step_6.mp4
+    - assets/video/output_step_7.mp4
+    - assets/video/output_step_8.mp4
+    - assets/video/output_step_9.mp4
+    - assets/video/output_step_10.mp4
+    - assets/video/output_step_11.mp4
+    - assets/video/output_step_12.mp4
+    - assets/video/output_step_13.mp4
+    - assets/video/output_step_14.mp4
+    - assets/video/output_step_15.mp4
+    - assets/video/output_step_16.mp4
+    - assets/video/output_step_17.mp4
+    - assets/video/output_step_18.mp4
+    - assets/video/output_step_19.mp4
+    - assets/audio/audio_step_1.mp3
+    - assets/audio/audio_step_2.mp3
+    - assets/audio/audio_step_3.mp3
+    - assets/audio/audio_step_4.mp3
+    - assets/audio/audio_step_5.mp3
+    - assets/audio/audio_step_6.mp3
+    - assets/audio/audio_step_7.mp3
+    - assets/audio/audio_step_8.mp3
+    - assets/audio/audio_step_9.mp3
+    - assets/audio/audio_step_10.mp3
+    - assets/audio/audio_step_11.mp3
+    - assets/audio/audio_step_12.mp3
+    - assets/audio/audio_step_13.mp3
+    - assets/audio/audio_step_14.mp3
+    - assets/audio/audio_step_15.mp3
+    - assets/audio/audio_step_16.mp3
+    - assets/audio/audio_step_17.mp3
+    - assets/audio/audio_step_18.mp3
+    - assets/audio/audio_step_19.mp3
     - .env
 
   # To add custom fonts to your application, add a fonts section here,

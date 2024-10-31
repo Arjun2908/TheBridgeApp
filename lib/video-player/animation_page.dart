@@ -12,6 +12,7 @@ import 'package:scribble/scribble.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:the_bridge_app/global_helpers.dart';
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'consts.dart';
 
@@ -45,6 +46,9 @@ class _AnimationPageState extends State<AnimationPage> {
   String _drawerContent = '';
   final ScribbleNotifier _scribbleNotifier = ScribbleNotifier();
   bool showScribble = false;
+  bool audioEnabled = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isAudioPlaying = false;
 
   @override
   void initState() {
@@ -54,6 +58,13 @@ class _AnimationPageState extends State<AnimationPage> {
 
     _loadVideoForStep(_currentStep);
     FToastBuilder();
+
+    // Add audio completion listener
+    _audioPlayer.onPlayerComplete.listen((event) {
+      setState(() {
+        _isAudioPlaying = false;
+      });
+    });
   }
 
   Widget _buildDrawingToolbar() {
@@ -116,11 +127,17 @@ class _AnimationPageState extends State<AnimationPage> {
     _nextController?.dispose();
     _prevController?.dispose();
     _scribbleNotifier.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   void _nextStep() async {
     if (_currentStep < steps.length - 1) {
+      await _audioPlayer.stop(); // Stop current audio
+      setState(() {
+        _isAudioPlaying = false;
+      });
+
       await _controller.pause(); // Pause current video
       await _nextController?.seekTo(Duration.zero); // Seek to the start
 
@@ -142,11 +159,20 @@ class _AnimationPageState extends State<AnimationPage> {
         _prevController = VideoPlayerController.asset(steps[_currentStep - 1].videoPath);
         _initializePrevVideoPlayerFuture = _prevController!.initialize();
       }
+
+      if (audioEnabled) {
+        await _playCurrentStepAudio(); // Play new step's audio
+      }
     }
   }
 
   void _prevStep() async {
     if (_currentStep > 0) {
+      await _audioPlayer.stop(); // Stop current audio
+      setState(() {
+        _isAudioPlaying = false;
+      });
+
       await _controller.pause(); // Pause current video
       await _prevController?.seekTo(Duration.zero); // Seek to the start
 
@@ -167,6 +193,10 @@ class _AnimationPageState extends State<AnimationPage> {
       if (_currentStep < steps.length - 1) {
         _nextController = VideoPlayerController.asset(steps[_currentStep + 1].videoPath);
         _initializeNextVideoPlayerFuture = _nextController!.initialize();
+      }
+
+      if (audioEnabled) {
+        await _playCurrentStepAudio(); // Play new step's audio
       }
     }
   }
@@ -205,6 +235,38 @@ class _AnimationPageState extends State<AnimationPage> {
       _drawerContent = 'notes';
     });
     _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void toggleAudio() async {
+    setState(() {
+      audioEnabled = !audioEnabled;
+    });
+
+    if (audioEnabled) {
+      await _playCurrentStepAudio();
+    } else {
+      await _audioPlayer.stop();
+      setState(() {
+        _isAudioPlaying = false;
+      });
+    }
+  }
+
+  Future<void> _playCurrentStepAudio() async {
+    if (!audioEnabled) return;
+
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource(steps[_currentStep].audioPath));
+      setState(() {
+        _isAudioPlaying = true;
+      });
+    } catch (e) {
+      print('Error playing audio: $e');
+      setState(() {
+        _isAudioPlaying = false;
+      });
+    }
   }
 
   Widget _buildDrawerContent() {
@@ -485,6 +547,10 @@ class _AnimationPageState extends State<AnimationPage> {
         child: AppBar(
           backgroundColor: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
           actions: [
+            IconButton(
+              onPressed: toggleAudio,
+              icon: Icon(audioEnabled ? (_isAudioPlaying ? Icons.volume_up : Icons.volume_down) : Icons.volume_off),
+            ),
             IconButton(
               onPressed: () {
                 _showNotes();
