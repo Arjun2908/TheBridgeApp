@@ -101,7 +101,7 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
           onTapCancel: () => setState(() => _isPressed = false),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
+            transform: Matrix4.identity()..scale(_isPressed ? 0.96 : 1.0),
             child: Card(
               elevation: _isPressed ? 5 : 10,
               margin: const EdgeInsets.only(bottom: 16),

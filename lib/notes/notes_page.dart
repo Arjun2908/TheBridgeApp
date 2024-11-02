@@ -179,95 +179,109 @@ class _NotesPageState extends State<NotesPage> {
                   itemCount: filteredNotes.length,
                   itemBuilder: (context, index) {
                     final note = filteredNotes[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      elevation: 20,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: InkWell(
-                        onTap: () => _showEditNoteDialog(note),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      note.content,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.more_vert),
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => SafeArea(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ListTile(
-                                                leading: const Icon(Icons.edit),
-                                                title: const Text('Edit'),
-                                                onTap: () {
-                                                  Navigator.pop(context);
-                                                  _showEditNoteDialog(note);
-                                                },
-                                              ),
-                                              ListTile(
-                                                leading: Icon(
-                                                  Icons.delete,
-                                                  color: Theme.of(context).colorScheme.error,
-                                                ),
-                                                title: Text(
-                                                  'Delete',
-                                                  style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.error,
-                                                  ),
-                                                ),
-                                                onTap: () {
-                                                  Navigator.pop(context);
-                                                  context.read<NotesProvider>().deleteNoteById(note.id!);
-                                                },
-                                              ),
-                                            ],
+                    bool isPressed = false;
+
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return GestureDetector(
+                          onTapDown: (_) => setState(() => isPressed = true),
+                          onTapUp: (_) {
+                            setState(() => isPressed = false);
+                            _showEditNoteDialog(note);
+                          },
+                          onTapCancel: () => setState(() => isPressed = false),
+                          child: AnimatedScale(
+                            duration: const Duration(milliseconds: 150),
+                            scale: isPressed ? 0.98 : 1.0,
+                            child: Card(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              elevation: isPressed ? 5 : 10,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            note.content,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              height: 1.5,
+                                            ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    size: 16,
-                                    color: Theme.of(context).colorScheme.outline,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    formatTimestamp(note.timestamp),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.outline,
+                                        IconButton(
+                                          icon: const Icon(Icons.more_vert),
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                              context: context,
+                                              builder: (context) => SafeArea(
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    ListTile(
+                                                      leading: const Icon(Icons.edit),
+                                                      title: const Text('Edit'),
+                                                      onTap: () {
+                                                        Navigator.pop(context);
+                                                        _showEditNoteDialog(note);
+                                                      },
+                                                    ),
+                                                    ListTile(
+                                                      leading: Icon(
+                                                        Icons.delete,
+                                                        color: Theme.of(context).colorScheme.error,
+                                                      ),
+                                                      title: Text(
+                                                        'Delete',
+                                                        style: TextStyle(
+                                                          color: Theme.of(context).colorScheme.error,
+                                                        ),
+                                                      ),
+                                                      onTap: () {
+                                                        Navigator.pop(context);
+                                                        context.read<NotesProvider>().deleteNoteById(note.id!);
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 16,
+                                          color: Theme.of(context).colorScheme.outline,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          formatTimestamp(note.timestamp),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(context).colorScheme.outline,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
