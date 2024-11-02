@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
                         fit: BoxFit.contain,
                       ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Card(
                 child: InkWell(
                   onTap: () => onItemTapped(4, context),

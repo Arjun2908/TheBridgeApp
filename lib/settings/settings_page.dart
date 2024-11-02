@@ -41,13 +41,58 @@ class SettingsPage extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                child: SwitchListTile(
-                  title: const Text('Dark Mode'),
-                  secondary: const Icon(Icons.dark_mode),
-                  value: settingsProvider.darkMode,
-                  onChanged: (bool value) {
-                    settingsProvider.updateSettings(value, settingsProvider.textSize, settingsProvider.themeColorHex);
-                  },
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.brightness_6),
+                      title: const Text('Theme'),
+                      subtitle: Text(settingsProvider.useSystemTheme
+                          ? 'System default'
+                          : settingsProvider.darkMode
+                              ? 'Dark mode'
+                              : 'Light mode'),
+                      trailing: SizedBox(
+                        width: 130,
+                        child: SegmentedButton<String>(
+                          showSelectedIcon: false,
+                          segments: const [
+                            ButtonSegment(
+                              value: 'system',
+                              icon: Icon(Icons.brightness_auto),
+                            ),
+                            ButtonSegment(
+                              value: 'light',
+                              icon: Icon(Icons.light_mode),
+                            ),
+                            ButtonSegment(
+                              value: 'dark',
+                              icon: Icon(Icons.dark_mode),
+                            ),
+                          ],
+                          selected: {
+                            settingsProvider.useSystemTheme
+                                ? 'system'
+                                : settingsProvider.darkMode
+                                    ? 'dark'
+                                    : 'light'
+                          },
+                          onSelectionChanged: (Set<String> selection) {
+                            switch (selection.first) {
+                              case 'system':
+                                settingsProvider.toggleSystemTheme();
+                                break;
+                              case 'light':
+                                settingsProvider.setLightMode();
+                                break;
+                              case 'dark':
+                                settingsProvider.setDarkMode();
+                                break;
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -63,7 +108,7 @@ class SettingsPage extends StatelessWidget {
                     value: getTextSizeString(settingsProvider.textSize),
                     onChanged: (String? newValue) {
                       if (newValue != null) {
-                        settingsProvider.updateSettings(settingsProvider.darkMode, getTextSize(newValue), settingsProvider.themeColorHex);
+                        settingsProvider.setTextSize(getTextSize(newValue));
                       }
                     },
                     items: <String>['Small', 'Medium', 'Large'].map<DropdownMenuItem<String>>((String value) {
@@ -95,11 +140,7 @@ class SettingsPage extends StatelessWidget {
                               child: ColorPicker(
                                 pickerColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
                                 onColorChanged: (Color color) {
-                                  settingsProvider.updateSettings(
-                                    settingsProvider.darkMode,
-                                    settingsProvider.textSize,
-                                    '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                                  );
+                                  settingsProvider.setThemeColor('#${color.value.toRadixString(16).substring(2).toUpperCase()}');
                                 },
                               ),
                             ),

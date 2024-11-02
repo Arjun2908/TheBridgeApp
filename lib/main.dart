@@ -14,7 +14,6 @@ import 'package:the_bridge_app/resources/providers/resource_provider.dart';
 
 import 'package:the_bridge_app/settings/settings_page.dart';
 import 'package:the_bridge_app/video-player/animation_page.dart';
-import 'package:the_bridge_app/video/video_page.dart';
 import 'package:the_bridge_app/home/home_page.dart';
 import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
 import 'package:the_bridge_app/ai_practice/ai_practice_page.dart';
@@ -51,10 +50,22 @@ class MyApp extends StatelessWidget {
             builder: FToastBuilder(),
             title: 'Bridge Diagram Tutorial',
             debugShowCheckedModeBanner: false,
+            themeMode: settingsProvider.useSystemTheme
+                ? ThemeMode.system
+                : settingsProvider.darkMode
+                    ? ThemeMode.dark
+                    : ThemeMode.light,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
-                brightness: settingsProvider.darkMode ? Brightness.dark : Brightness.light,
+              ),
+              textTheme: buildTextTheme(settingsProvider.textSize),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Color(int.parse(settingsProvider.themeColorHex.substring(1, 7), radix: 16) + 0xFF000000),
+                brightness: Brightness.dark,
               ),
               textTheme: buildTextTheme(settingsProvider.textSize),
               useMaterial3: true,
