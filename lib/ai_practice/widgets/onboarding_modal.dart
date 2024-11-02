@@ -131,7 +131,7 @@ class _OnboardingModalState extends State<OnboardingModal> {
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _currentPage == index ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                        color: _currentPage == index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                   ),
