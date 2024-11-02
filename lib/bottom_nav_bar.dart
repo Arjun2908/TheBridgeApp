@@ -33,8 +33,8 @@ class BottomNavBar extends StatelessWidget {
           label: 'Notes',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Settings',
+          icon: Icon(Icons.chat),
+          label: 'AI Practice',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.library_books),

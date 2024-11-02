@@ -2,13 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/about/about_page.dart';
-import 'package:the_bridge_app/bottom_nav_bar.dart';
 import 'package:the_bridge_app/feedback_page.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import 'package:the_bridge_app/providers/settings_provider.dart';
 import 'package:the_bridge_app/settings/helpers.dart';
-import 'package:the_bridge_app/global_helpers.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -145,7 +143,7 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Divider(),
+              const Divider(),
               const SizedBox(height: 16),
               Card(
                 elevation: 3,
@@ -184,10 +182,6 @@ class SettingsPage extends StatelessWidget {
             ],
           );
         },
-      ),
-      bottomNavigationBar: BottomNavBar(
-        selectedIndex: 2,
-        onItemTapped: (index) => onItemTapped(index, context),
       ),
     );
   }

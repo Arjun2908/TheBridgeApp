@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_bridge_app/bottom_nav_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:the_bridge_app/widgets/common_app_bar.dart';
 import '../providers/resource_provider.dart';
 import '../models/resource.dart';
 import 'package:the_bridge_app/global_helpers.dart';
@@ -20,9 +21,9 @@ class ResourceLibraryPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Resources'),
-          bottom: const TabBar(
+        appBar: const CommonAppBar(
+          title: 'Resources',
+          bottom: TabBar(
             tabs: [
               Tab(icon: Icon(Icons.video_library), text: 'Videos'),
               Tab(icon: Icon(Icons.book), text: 'Study Guides'),

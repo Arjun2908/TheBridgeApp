@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 
 import 'package:the_bridge_app/home/home_page.dart';
 import 'package:the_bridge_app/notes/notes_page.dart';
+import 'package:the_bridge_app/ai_practice/ai_practice_page.dart';
 import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
-import 'package:the_bridge_app/settings/settings_page.dart';
 
 TextTheme buildTextTheme(double textSize) {
   return TextTheme(
@@ -44,15 +44,12 @@ void onItemTapped(int index, BuildContext context) {
       page = const NotesPage();
       break;
     case 2:
-      page = const SettingsPage();
+      page = const AIPracticePage();
       break;
     case 3:
       page = const ResourceLibraryPage();
       break;
     case 4:
-      Navigator.pushNamed(context, '/video');
-      return;
-    case 5:
       Navigator.pushNamed(context, '/main');
       return;
     default:

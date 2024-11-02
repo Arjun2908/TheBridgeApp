@@ -4,6 +4,7 @@ import 'package:the_bridge_app/bottom_nav_bar.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'package:the_bridge_app/global_helpers.dart';
+import 'package:the_bridge_app/widgets/common_app_bar.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -62,10 +63,9 @@ class _NotesPageState extends State<NotesPage> {
           _getNotes();
         }
         return Scaffold(
-          appBar: AppBar(
-            centerTitle: false,
-            title: const Text('Saved Notes', style: TextStyle(fontSize: 22)),
-            actions: [
+          appBar: CommonAppBar(
+            title: 'Saved Notes',
+            additionalActions: [
               IconButton(
                 icon: const Icon(Icons.filter_alt),
                 onPressed: _selectDateRange,

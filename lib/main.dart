@@ -17,6 +17,8 @@ import 'package:the_bridge_app/video-player/animation_page.dart';
 import 'package:the_bridge_app/video/video_page.dart';
 import 'package:the_bridge_app/home/home_page.dart';
 import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
+import 'package:the_bridge_app/ai_practice/ai_practice_page.dart';
+import 'package:the_bridge_app/ai_practice/providers/ai_practice_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FeedbackProvider()),
         ChangeNotifierProvider(create: (_) => NotesProvider()),
         ChangeNotifierProvider(create: (_) => ResourceProvider()),
+        ChangeNotifierProvider(create: (_) => AIPracticeProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
@@ -59,10 +62,10 @@ class MyApp extends StatelessWidget {
             home: const HomePage(),
             routes: {
               '/main': (context) => const AnimationPage(),
-              '/video': (context) => const VideoPage(),
               '/settings': (context) => const SettingsPage(),
               '/notes': (context) => const NotesPage(),
               '/resources': (context) => const ResourceLibraryPage(),
+              '/ai_practice': (context) => const AIPracticePage(),
             },
           );
         },
