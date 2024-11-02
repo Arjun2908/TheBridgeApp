@@ -51,6 +51,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
           additionalActions: [
             IconButton(
               icon: const Icon(Icons.help_outline),
+              tooltip: 'Help',
               onPressed: () {
                 showDialog(
                   context: context,
@@ -60,11 +61,13 @@ class _AIPracticePageState extends State<AIPracticePage> {
               },
             ),
           ],
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            tabs: const [
               Tab(text: 'Practice Mode'),
               Tab(text: 'Question Bank'),
             ],
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         body: TabBarView(
@@ -90,55 +93,87 @@ class _AIPracticePageState extends State<AIPracticePage> {
         return Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Talking to: ${aiProvider.currentSession!.personality.capitalize()}'),
+                  Text(
+                    'Talking to: ${aiProvider.currentSession!.personality.capitalize()}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   TextButton.icon(
-                    icon: const Icon(Icons.stop),
+                    icon: const Icon(Icons.stop, size: 20),
                     label: const Text('End Chat'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
                     onPressed: () => _showEndChatDialog(aiProvider),
                   ),
                 ],
               ),
             ),
-            if (aiProvider.lastSession != null)
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Last chat: ${aiProvider.lastSession!.personality.capitalize()} - ${aiProvider.lastSession!.messages.length} messages'),
-              ),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
+                padding: const EdgeInsets.all(8.0),
                 itemCount: aiProvider.currentSession!.messages.length,
                 itemBuilder: (context, index) {
                   final message = aiProvider.currentSession!.messages[index];
-                  return ListTile(
-                    leading: Icon(
-                      message.isUser ? Icons.person : Icons.computer,
+                  return Align(
+                    alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(message.content),
                     ),
-                    title: Text(message.content),
                   );
                 },
               ),
             ),
-            Padding(
+            Container(
               padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -1),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _messageController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Type your message...',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
+                  const SizedBox(width: 8),
+                  FloatingActionButton(
                     onPressed: () => _sendMessage(aiProvider),
+                    child: const Icon(Icons.send),
                   ),
                 ],
               ),
