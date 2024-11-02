@@ -179,13 +179,9 @@ class _NotesPageState extends State<NotesPage> {
                     final note = filteredNotes[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
-                      elevation: 0,
+                      elevation: 20,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                          width: 1,
-                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: InkWell(
                         onTap: () => _showEditNoteDialog(note),
