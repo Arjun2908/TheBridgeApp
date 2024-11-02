@@ -1,0 +1,19 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="noteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E3F2FD"/>
+      <stop offset="100%" stop-color="#BBDEFB"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Elements -->
+  <!-- <circle cx="120" cy="120" r="100" fill="url(#noteGradient)" opacity="0.5"/> -->
+  
+  <!-- Empty Notepad -->
+  <path d="M70 60h100v120H70z" fill="white" stroke="#2196F3" stroke-width="4"/>
+  <path d="M85 85h70M85 105h70M85 125h40" stroke="#90CAF9" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Plus Icon -->
+  <circle cx="160" cy="160" r="25" fill="#2196F3"/>
+  <path d="M150 160h20M160 150v20" stroke="white" stroke-width="4" stroke-linecap="round"/>
+</svg> 

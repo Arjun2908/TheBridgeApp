@@ -1,0 +1,37 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="loadingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E3F2FD"/>
+      <stop offset="100%" stop-color="#BBDEFB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="80" fill="url(#loadingGradient)" opacity="0.5"/>
+
+  <!-- Stacked Notes -->
+  <g transform="translate(60, 60)">
+    <!-- Back Note -->
+    <rect x="10" y="10" width="60" height="80" fill="white" stroke="#90CAF9" stroke-width="2"/>
+    <path d="M20 30h40M20 45h40M20 60h25" stroke="#90CAF9" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Middle Note -->
+    <rect x="5" y="5" width="60" height="80" fill="white" stroke="#64B5F6" stroke-width="2"/>
+    <path d="M15 25h40M15 40h40M15 55h25" stroke="#64B5F6" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Front Note -->
+    <rect x="0" y="0" width="60" height="80" fill="white" stroke="#2196F3" stroke-width="2"/>
+    <path d="M10 20h40M10 35h40M10 50h25" stroke="#2196F3" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Loading Circles -->
+  <circle cx="60" cy="160" r="5" fill="#2196F3">
+    <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" begin="0s"/>
+  </circle>
+  <circle cx="100" cy="160" r="5" fill="#2196F3">
+    <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+  </circle>
+  <circle cx="140" cy="160" r="5" fill="#2196F3">
+    <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" begin="1s"/>
+  </circle>
+</svg> 

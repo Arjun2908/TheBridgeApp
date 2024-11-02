@@ -5,6 +5,7 @@ import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'package:the_bridge_app/global_helpers.dart';
 import 'package:the_bridge_app/widgets/common_app_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -19,13 +20,41 @@ class _NotesPageState extends State<NotesPage> {
   DateTimeRange? _dateRange;
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch notes when the page is first loaded
+    Future.microtask(() => context.read<NotesProvider>().fetchNotes());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer<NotesProvider>(
       builder: (context, notesProvider, child) {
-        if (notesProvider.notes.isEmpty) {
-          _getNotes();
+        if (notesProvider.isLoading) {
+          return Scaffold(
+            appBar: const CommonAppBar(title: 'Notes'),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/illustrations/loading_notes.svg',
+                    width: 200,
+                    height: 200,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Loading your notes...',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          );
         }
 
         List<Note> filteredNotes = notesProvider.notes.where((note) {
@@ -99,29 +128,48 @@ class _NotesPageState extends State<NotesPage> {
           ),
           body: filteredNotes.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.note_outlined,
-                        size: 64,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        notesProvider.notes.isEmpty ? 'No notes yet' : 'No matching notes found',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      children: [
+                        SvgPicture.asset(
+                          notesProvider.notes.isEmpty ? 'assets/illustrations/no_notes.svg' : 'assets/illustrations/no_matches.svg',
+                          width: 240,
+                          height: 240,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        onPressed: _showAddNoteDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add a note'),
-                      ),
-                    ],
+                        Text(
+                          notesProvider.notes.isEmpty ? 'No notes yet' : 'No matching notes found',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          notesProvider.notes.isEmpty ? 'Start capturing your thoughts and insights' : 'Try adjusting your search or filters',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        if (notesProvider.notes.isEmpty)
+                          FilledButton.icon(
+                            onPressed: _showAddNoteDialog,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Your First Note'),
+                          )
+                        else
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                                _dateRange = null;
+                              });
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Clear Filters'),
+                          ),
+                      ],
+                    ),
                   ),
                 )
               : ListView.builder(
@@ -237,10 +285,6 @@ class _NotesPageState extends State<NotesPage> {
         );
       },
     );
-  }
-
-  void _getNotes() {
-    context.read<NotesProvider>().fetchNotes();
   }
 
   void _selectDateRange() async {

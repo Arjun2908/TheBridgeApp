@@ -187,7 +187,6 @@ final List<Step> steps = [
     We are called Children of God and co-heirs of the kingdom with Jesus\n
     God gives us eternal life. When we die we will be with Him in heaven\n
     God says that when he looks at us He no longer sees our sin but sees Jesus’ perfection\n
-    And there are many other things
     """,
     audioPath: 'audio/audio_step_18.mp3',
   ),

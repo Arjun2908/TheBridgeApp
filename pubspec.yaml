@@ -100,6 +100,9 @@ flutter:
     - assets/illustrations/personality.svg
     - assets/illustrations/conversation.svg
     - assets/illustrations/question_bank.svg
+    - assets/illustrations/no_notes.svg
+    - assets/illustrations/no_matches.svg
+    - assets/illustrations/loading_notes.svg
     - .env
 
   # To add custom fonts to your application, add a fonts section here,

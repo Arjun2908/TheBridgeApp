@@ -1,0 +1,21 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="searchGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EDE7F6"/>
+      <stop offset="100%" stop-color="#D1C4E9"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Elements -->
+  <!-- <circle cx="120" cy="120" r="100" fill="url(#searchGradient)" opacity="0.5"/> -->
+  
+  <!-- Magnifying Glass -->
+  <circle cx="100" cy="100" r="40" fill="none" stroke="#2196F3" stroke-width="8"/>
+  <path d="M130 130L160 160" stroke="#2196F3" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Notes -->
+  <g transform="translate(140, 80) rotate(15)">
+    <rect width="40" height="50" fill="white" stroke="#2196F3" stroke-width="2"/>
+    <path d="M10 15h20M10 25h20M10 35h12" stroke="#B39DDB" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg> 
