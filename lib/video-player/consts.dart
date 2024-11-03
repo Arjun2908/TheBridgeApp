@@ -133,20 +133,19 @@ final List<Step> steps = [
   Step(
     videoPath: 'assets/video/output_step_13.mp4',
     verses: ["Isaiah 59:2", "Romans 6:23"],
-    info:
-        "Because of sin there is separation from God and we are broken apart from his family. When we decide to sin we are telling God that we would rather be a part of the Family of Sin rather than the Family of God.",
+    info: "",
     additionalText: "Separation",
     additionalDialogMessage:
-        "And remember that God is a Just God. All evil has a just punishment. The Bible says that the just punishment for sin is death. Yes we will all die physically, but if we are not in God’s family when we physically die there is also a spiritual death. An eternity separated from God.",
+        "Because of sin there is separation from God and we are broken apart from his family. When we decide to sin we are telling God that we would rather be a part of the Family of Sin rather than the Family of God. \n\nAnd remember that God is a Just God. All evil has a just punishment. The Bible says that the just punishment for sin is death. Yes we will all die physically, but if we are not in God’s family when we physically die there is also a spiritual death. An eternity separated from God.",
     audioPath: 'audio/audio_step_13.mp3',
   ),
   Step(
     videoPath: 'assets/video/output_step_14.mp4',
     verses: ["Romans 8:20-22", "Ecclesiastes 1:14"],
-    info:
-        "As humans we can feel the brokenness of life. We see it all around us. We see the brokenness on a grand scale in governments and social injustices, but we can also see the brokenness of our friends and families and even in ourselves.",
+    info: ".",
     additionalText: "Brokenness",
-    additionalDialogMessage: "Most people are asking the question, “How can the brokenness I see be fixed?” We long for a perfect, loving, and just world. We are longing for who God is.",
+    additionalDialogMessage:
+        "As humans we can feel the brokenness of life. We see it all around us. We see the brokenness on a grand scale in governments and social injustices, but we can also see the brokenness of our friends and families and even in ourselves. \n\nMost people are asking the question, “How can the brokenness I see be fixed?” We long for a perfect, loving, and just world. We are longing for who God is.",
     audioPath: 'audio/audio_step_14.mp3',
   ),
   Step(
@@ -162,10 +161,10 @@ final List<Step> steps = [
   Step(
     videoPath: 'assets/video/output_step_16.mp4',
     verses: ["John 3:16", "Romans 5:8"],
-    info: "This is a bleak scenario, but luckily the story doesn’t end there.",
+    info: "",
     additionalText: "Cross",
     additionalDialogMessage:
-        "God’s desire is for us to be back in His family, but He knows that we aren’t able to make it back on our own. So we see his Perfect Love and his Perfect Justice combine in a grand plan to bring us back. His grand plan was to send Jesus, who is fully God to earth and become fully man. Jesus lived a perfect, loving, and just life. And then He died on a cross. He died to pay the punishment that we deserved. The just punishment for our sins was death, and Jesus died to pay for it. And then he rose from the dead to show that He is more powerful than death itself. He built a bridge so you could cross the gap.",
+        "This is a bleak scenario, but luckily the story doesn’t end there. \n\nGod’s desire is for us to be back in His family, but He knows that we aren’t able to make it back on our own. So we see his Perfect Love and his Perfect Justice combine in a grand plan to bring us back. His grand plan was to send Jesus, who is fully God to earth and become fully man. Jesus lived a perfect, loving, and just life. And then He died on a cross. He died to pay the punishment that we deserved. The just punishment for our sins was death, and Jesus died to pay for it. And then he rose from the dead to show that He is more powerful than death itself. He built a bridge so you could cross the gap.",
     audioPath: 'audio/audio_step_16.mp3',
   ),
   Step(
@@ -183,10 +182,10 @@ final List<Step> steps = [
     verses: ["1 Corinthians 3:16", "Romans 8:17"],
     info: "And when we accept this adoption miraculous things happen.",
     additionalText: "God's Gift",
-    additionalDialogMessage: """God now dwells inside us, the Holy Spirit\n
+    additionalDialogMessage: """And when we accept this adoption miraculous things happen! God now dwells inside us, the Holy Spirit\n
     We are called Children of God and co-heirs of the kingdom with Jesus\n
     God gives us eternal life. When we die we will be with Him in heaven\n
-    God says that when he looks at us He no longer sees our sin but sees Jesus’ perfection\n
+    God says that when he looks at us He no longer sees our sin but sees Jesus’ perfection
     """,
     audioPath: 'audio/audio_step_18.mp3',
   ),

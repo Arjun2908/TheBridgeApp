@@ -40,12 +40,9 @@ class AnimationPage extends StatefulWidget {
 
 class _AnimationPageState extends State<AnimationPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late VideoPlayerController _controller;
-  VideoPlayerController? _nextController = VideoPlayerController.asset(steps[1].videoPath);
-  VideoPlayerController? _prevController = VideoPlayerController.asset(steps[0].videoPath);
-  late Future<void> _initializeVideoPlayerFuture;
-  Future<void>? _initializeNextVideoPlayerFuture;
-  Future<void>? _initializePrevVideoPlayerFuture;
+  late List<VideoPlayerController> _controllers;
+  late VideoPlayerController _currentController;
+  late Future<void> _initializeVideoPlayersFuture;
   int _currentStep = 0;
   String _drawerContent = '';
   final ScribbleNotifier _scribbleNotifier = ScribbleNotifier();
@@ -60,7 +57,21 @@ class _AnimationPageState extends State<AnimationPage> {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
-    _loadVideoForStep(_currentStep);
+    // Initialize all controllers at once
+    _controllers = List.generate(
+      steps.length,
+      (index) => VideoPlayerController.asset(steps[index].videoPath),
+    );
+
+    // Initialize all controllers and set current controller
+    _initializeVideoPlayersFuture = Future.wait(
+      _controllers.map((controller) => controller.initialize()),
+    ).then((_) {
+      _currentController = _controllers[_currentStep];
+      _currentController.play();
+      setState(() {});
+    });
+
     FToastBuilder();
 
     // Add audio completion listener
@@ -104,32 +115,12 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 
-  void _loadVideoForStep(int stepIndex) {
-    _controller = VideoPlayerController.asset(steps[stepIndex].videoPath);
-    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      setState(() {});
-      _controller.play(); // Play the current video automatically
-    });
-
-    // Preload the next video if it's available
-    if (stepIndex < steps.length - 1) {
-      _nextController = VideoPlayerController.asset(steps[stepIndex + 1].videoPath);
-      _initializeNextVideoPlayerFuture = _nextController!.initialize();
-    }
-
-    // Preload the previous video if it's available
-    if (stepIndex > 0) {
-      _prevController = VideoPlayerController.asset(steps[stepIndex - 1].videoPath);
-      _initializePrevVideoPlayerFuture = _prevController!.initialize();
-    }
-  }
-
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _controller.dispose();
-    _nextController?.dispose();
-    _prevController?.dispose();
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
     _scribbleNotifier.dispose();
     _audioPlayer.dispose();
     super.dispose();
@@ -137,70 +128,58 @@ class _AnimationPageState extends State<AnimationPage> {
 
   void _nextStep() async {
     if (_currentStep < steps.length - 1) {
-      await _audioPlayer.stop(); // Stop current audio
+      await _audioPlayer.stop();
       setState(() {
         _isAudioPlaying = false;
       });
 
-      await _controller.pause(); // Pause current video
-      await _nextController?.seekTo(Duration.zero); // Seek to the start
+      // Pause current video first
+      await _currentController.pause();
+
+      // Prepare next video before showing it
+      final nextController = _controllers[_currentStep + 1];
+      await nextController.seekTo(Duration.zero);
+      await nextController.pause(); // Ensure it's paused at the start
 
       setState(() {
         _currentStep++;
-        _controller = _nextController!; // Swap to the preloaded next video
+        _currentController = nextController;
       });
 
-      _controller.play(); // Play the preloaded video
-
-      // Preload the next video if possible
-      if (_currentStep < steps.length - 1) {
-        _nextController = VideoPlayerController.asset(steps[_currentStep + 1].videoPath);
-        _initializeNextVideoPlayerFuture = _nextController!.initialize();
-      }
-
-      // Preload the previous video if possible
-      if (_currentStep > 0) {
-        _prevController = VideoPlayerController.asset(steps[_currentStep - 1].videoPath);
-        _initializePrevVideoPlayerFuture = _prevController!.initialize();
-      }
+      // Start playing after state is updated
+      _currentController.play();
 
       if (audioEnabled) {
-        await _playCurrentStepAudio(); // Play new step's audio
+        await _playCurrentStepAudio();
       }
     }
   }
 
   void _prevStep() async {
     if (_currentStep > 0) {
-      await _audioPlayer.stop(); // Stop current audio
+      await _audioPlayer.stop();
       setState(() {
         _isAudioPlaying = false;
       });
 
-      await _controller.pause(); // Pause current video
-      await _prevController?.seekTo(Duration.zero); // Seek to the start
+      // Pause current video first
+      await _currentController.pause();
+
+      // Prepare previous video before showing it
+      final prevController = _controllers[_currentStep - 1];
+      await prevController.seekTo(Duration.zero);
+      await prevController.pause(); // Ensure it's paused at the start
 
       setState(() {
         _currentStep--;
-        _controller = _prevController!; // Swap to the preloaded previous video
+        _currentController = prevController;
       });
 
-      _controller.play(); // Play the preloaded video
-
-      // Preload the previous video if possible
-      if (_currentStep > 0) {
-        _prevController = VideoPlayerController.asset(steps[_currentStep - 1].videoPath);
-        _initializePrevVideoPlayerFuture = _prevController!.initialize();
-      }
-
-      // Preload the next video if possible
-      if (_currentStep < steps.length - 1) {
-        _nextController = VideoPlayerController.asset(steps[_currentStep + 1].videoPath);
-        _initializeNextVideoPlayerFuture = _nextController!.initialize();
-      }
+      // Start playing after state is updated
+      _currentController.play();
 
       if (audioEnabled) {
-        await _playCurrentStepAudio(); // Play new step's audio
+        await _playCurrentStepAudio();
       }
     }
   }
@@ -835,7 +814,7 @@ class _AnimationPageState extends State<AnimationPage> {
           }
         },
         child: FutureBuilder(
-          future: _initializeVideoPlayerFuture,
+          future: _initializeVideoPlayersFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return Container(
@@ -844,29 +823,61 @@ class _AnimationPageState extends State<AnimationPage> {
                   child: FittedBox(
                     fit: BoxFit.fill,
                     child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
+                      width: _currentController.value.size.width,
+                      height: _currentController.value.size.height,
                       child: Stack(
                         children: [
                           isDarkMode
                               ? ColorFiltered(
                                   colorFilter: const ColorFilter.matrix([
-                                    -1, 0, 0, 0, 230, // Red
-                                    0, -1, 0, 0, 230, // Green
-                                    0, -0.236, -1, 0, 255, // Blue
-                                    0, 0, 0, 1, 0, // Alpha
+                                    -1,
+                                    0,
+                                    0,
+                                    0,
+                                    230,
+                                    0,
+                                    -1,
+                                    0,
+                                    0,
+                                    230,
+                                    0,
+                                    -0.236,
+                                    -1,
+                                    0,
+                                    255,
+                                    0,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
                                   ]),
-                                  child: VideoPlayer(_controller),
+                                  child: VideoPlayer(_currentController),
                                 )
-                              : VideoPlayer(_controller),
+                              : VideoPlayer(_currentController),
                           if (showScribble)
                             isDarkMode
                                 ? ColorFiltered(
                                     colorFilter: const ColorFilter.matrix([
-                                      -1, 0, 0, 0, 230, // Red
-                                      0, -1, 0, 0, 230, // Green
-                                      0, -0.236, -1, 0, 255, // Blue
-                                      0, 0, 0, 1, 0, // Alpha
+                                      -1,
+                                      0,
+                                      0,
+                                      0,
+                                      230,
+                                      0,
+                                      -1,
+                                      0,
+                                      0,
+                                      230,
+                                      0,
+                                      -0.236,
+                                      -1,
+                                      0,
+                                      255,
+                                      0,
+                                      0,
+                                      0,
+                                      1,
+                                      0,
                                     ]),
                                     child: Scribble(notifier: _scribbleNotifier, drawPen: true),
                                   )
