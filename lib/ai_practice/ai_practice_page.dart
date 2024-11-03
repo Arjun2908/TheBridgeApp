@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../bottom_nav_bar.dart';
-import '../global_helpers.dart';
-import 'providers/ai_practice_provider.dart';
-import 'data/question_data.dart';
-import 'widgets/onboarding_modal.dart';
-import '../widgets/common_app_bar.dart';
-import 'widgets/typing_indicator.dart';
+
+import 'package:the_bridge_app/bottom_nav_bar.dart';
+import 'package:the_bridge_app/global_helpers.dart';
+
+import 'package:the_bridge_app/widgets/common_app_bar.dart';
+
+import 'package:the_bridge_app/ai_practice/providers/ai_practice_provider.dart';
+import 'package:the_bridge_app/ai_practice/widgets/onboarding_modal.dart';
+import 'package:the_bridge_app/ai_practice/widgets/typing_indicator.dart';
+
+import 'package:the_bridge_app/ai_practice/data/question_data.dart';
 
 class AIPracticePage extends StatefulWidget {
   const AIPracticePage({super.key});
