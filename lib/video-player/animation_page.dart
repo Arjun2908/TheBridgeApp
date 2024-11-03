@@ -11,6 +11,7 @@ import 'package:scribble/scribble.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:ui';
 
 import 'package:the_bridge_app/models/note.dart';
 import 'package:the_bridge_app/providers/notes_provider.dart';
@@ -212,10 +213,6 @@ class _AnimationPageState extends State<AnimationPage> {
     context.read<NotesProvider>().fetchNotes();
   }
 
-  void _getNotesForCurrentStep() {
-    context.read<NotesProvider>().fetchAllByStepId(_currentStep);
-  }
-
   void _showVerses() {
     _getVerse(steps[_currentStep].verses!.join(' '));
     setState(() {
@@ -231,9 +228,8 @@ class _AnimationPageState extends State<AnimationPage> {
     _scaffoldKey.currentState?.openEndDrawer();
   }
 
-  bool _showGlobalNotes = true; // Toggle between global and step-specific notes
   void _showNotes() {
-    _showGlobalNotes ? _getNotes() : _getNotesForCurrentStep();
+    _getNotes();
     setState(() {
       _drawerContent = 'notes';
     });
@@ -273,229 +269,472 @@ class _AnimationPageState extends State<AnimationPage> {
   }
 
   Widget _buildDrawerContent() {
-    if (_drawerContent == 'verses') {
-      return Stack(
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Column(
         children: [
-          Consumer<PassagesProvider>(
-            builder: (context, passageProvider, child) {
-              if (passageProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (passageProvider.passages != null) {
-                final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        title: const Text('Verses', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.ios_share),
-                          onPressed: () async {
-                            var toast = FToast();
-                            toast.init(context);
-                            final passageProvider = context.read<PassagesProvider>();
-                            if (passageProvider.passages != null) {
-                              final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
-                              final shareText = '$versesText\n\nShared from The Bridge App';
-                              await Share.share(shareText);
-                              toast.showToast(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                    color: Colors.black54,
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.check, color: Colors.white),
-                                      SizedBox(width: 12.0),
-                                      Text('Verses shared successfully', style: TextStyle(color: Colors.white)),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          versesText,
-                          style: const TextStyle(fontSize: 16, height: 1.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return const Center(child: Text('Enter a passage to fetch'));
-            },
+          _buildDrawerHeader(),
+          Expanded(
+            child: _buildDrawerBody(),
           ),
         ],
-      );
-    } else if (_drawerContent == 'additionalInfo') {
-      return SingleChildScrollView(
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader() {
+    String title = '';
+    IconData headerIcon = Icons.info;
+
+    switch (_drawerContent) {
+      case 'verses':
+        title = 'Bible Verses';
+        headerIcon = Icons.menu_book;
+        break;
+      case 'additionalInfo':
+        title = steps[_currentStep].additionalText;
+        headerIcon = Icons.info_outline;
+        break;
+      case 'notes':
+        title = 'Notes';
+        headerIcon = Icons.note;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 4, 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(headerIcon, color: Colors.white, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerBody() {
+    switch (_drawerContent) {
+      case 'verses':
+        return _buildVersesContent();
+      case 'additionalInfo':
+        return _buildAdditionalInfoContent();
+      case 'notes':
+        return _buildNotesContent();
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildVersesContent() {
+    return Consumer<PassagesProvider>(
+      builder: (context, passageProvider, child) {
+        if (passageProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (passageProvider.passages != null) {
+          return Column(
+            children: [
+              _buildShareButton(
+                onPressed: () async {
+                  final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
+                  await Share.share('$versesText\n\nShared from The Bridge App');
+                },
+                text: 'Share Verses',
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: passageProvider.passages!.map((passage) {
+                    return Card(
+                      elevation: 2,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          passage.text,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          );
+        }
+        return const Center(child: Text('No verses available'));
+      },
+    );
+  }
+
+  Widget _buildAdditionalInfoContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        elevation: 2,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Text(
             steps[_currentStep].additionalDialogMessage,
             style: const TextStyle(fontSize: 16, height: 1.5),
           ),
         ),
-      );
-    } else if (_drawerContent == 'notes') {
-      return Stack(
-        children: [
-          Consumer<NotesProvider>(
-            builder: (context, notesProvider, child) {
-              List<Note> notesToShow = _showGlobalNotes ? notesProvider.notes : notesProvider.notes.where((note) => note.step == _currentStep).toList();
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ListTile(
-                    title: Text('Notes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    // trailing: CustomSwitch(
-                    //   value: _showGlobalNotes,
-                    //   onChanged: (value) {
-                    //     setState(() {
-                    //       _showGlobalNotes = value;
-                    //       _showNotes(); // Refresh the notes list
-                    //     });
-                    //   },
-                    // ),
-                  ),
-                  const Divider(),
-                  Expanded(
-                    child: notesToShow.isNotEmpty
-                        ? ListView.builder(
-                            itemCount: notesToShow.length,
-                            itemBuilder: (context, index) {
-                              final note = notesToShow[index];
-                              return Dismissible(
-                                key: Key(note.id.toString()),
-                                direction: DismissDirection.endToStart,
-                                onDismissed: (_) {
-                                  context.read<NotesProvider>().deleteNoteById(note.id!);
-                                },
-                                background: Container(color: Colors.red),
-                                child: Column(
-                                  children: [
-                                    ListTile(
-                                      title: Text(note.content, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                      // subtitle: Text('${steps[note.step].additionalText} - ${formatTimestamp(note.timestamp)}'),
-                                      subtitle: Text(formatTimestamp(note.timestamp)),
-                                      onTap: () {
-                                        _showEditNoteDialog(note);
-                                      },
-                                    ),
-                                    // const Divider(),
-                                  ],
-                                ),
-                              );
-                            },
-                          )
-                        : const Center(child: Text('No notes available')),
-                  ),
-                ],
-              );
-            },
-          ),
-          // Positioned(
-          //   bottom: 24,
-          //   right: 24,
-          //   child: FloatingActionButton(
-          //     onPressed: _showAddNoteDialog,
-          //     child: const Icon(Icons.add),
-          //   ),
-          // ),
-        ],
-      );
-    }
-    return Container();
+      ),
+    );
   }
 
-  void _showAddNoteDialog() {
-    TextEditingController noteController = TextEditingController();
+  Widget _buildNotesContent() {
+    return Consumer<NotesProvider>(
+      builder: (context, notesProvider, child) {
+        List<Note> notesToShow = notesProvider.notes;
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Note', style: TextStyle(fontSize: 20)),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8, // Make the dialog wider
-            child: TextField(
-              controller: noteController,
-              decoration: const InputDecoration(
-                hintText: 'Enter your note here',
-                border: InputBorder.none,
-              ),
-              maxLines: 3,
+        return Column(
+          children: [
+            Expanded(
+              child: notesToShow.isEmpty ? _buildEmptyNotesState() : _buildNotesList(notesToShow),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (noteController.text.isNotEmpty) {
-                  final newNote = Note(
-                    content: noteController.text,
-                    step: _currentStep,
-                    timestamp: DateTime.now(),
-                  );
-                  context.read<NotesProvider>().addNote(newNote);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Add'),
-            ),
+            // _buildAddNoteButton(),
           ],
         );
       },
     );
   }
 
-  void _showEditNoteDialog(Note note) {
-    TextEditingController noteController = TextEditingController(text: note.content);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Note'),
-          content: TextField(
-            controller: noteController,
-            decoration: const InputDecoration(hintText: 'Edit your note here'),
+  Widget _buildNotesList(List<Note> notes) {
+    return ListView.builder(
+      itemCount: notes.length,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemBuilder: (context, index) {
+        final note = notes[index];
+        return Dismissible(
+          key: Key(note.id.toString()),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 16),
+            color: Colors.red,
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
+          onDismissed: (_) {
+            context.read<NotesProvider>().deleteNoteById(note.id!);
+          },
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              title: Text(
+                note.content,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(formatTimestamp(note.timestamp)),
+              // onTap: () => _showEditNoteDialog(note),
             ),
-            TextButton(
-              onPressed: () {
-                if (noteController.text.isNotEmpty) {
-                  note.content = noteController.text;
-                  context.read<NotesProvider>().updateNoteContent(note);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyNotesState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.note_alt_outlined,
+            size: 48,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No notes yet',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap the + button to add a note',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddNoteButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton.icon(
+        onPressed: _showAddNoteDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Note'),
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddNoteDialog() {
+    TextEditingController noteController = TextEditingController();
+    FocusNode focusNode = FocusNode();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+                left: 24,
+                right: 24,
+                top: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.note_add,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Add Note',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: TextField(
+                      controller: noteController,
+                      focusNode: focusNode,
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      style: const TextStyle(fontSize: 16, height: 1.5),
+                      decoration: const InputDecoration(
+                        hintText: 'Write your thoughts here...',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () {
+                          if (noteController.text.isNotEmpty) {
+                            final newNote = Note(
+                              content: noteController.text,
+                              step: _currentStep,
+                              timestamp: DateTime.now(),
+                            );
+                            context.read<NotesProvider>().addNote(newNote);
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) => focusNode.dispose());
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      focusNode.requestFocus();
+    });
+  }
+
+  void _showEditNoteDialog(Note note) {
+    TextEditingController noteController = TextEditingController(text: note.content);
+    FocusNode focusNode = FocusNode();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+                left: 24,
+                right: 24,
+                top: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.edit_note,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Edit Note',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: TextField(
+                      controller: noteController,
+                      focusNode: focusNode,
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      style: const TextStyle(fontSize: 16, height: 1.5),
+                      decoration: const InputDecoration(
+                        hintText: 'Write your thoughts here...',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () {
+                          if (noteController.text.isNotEmpty) {
+                            note.content = noteController.text;
+                            context.read<NotesProvider>().updateNoteContent(note);
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) => focusNode.dispose());
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      focusNode.requestFocus();
+    });
+  }
+
+  Widget _buildShareButton({
+    required VoidCallback onPressed,
+    required String text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.share),
+        label: Text(text),
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+      ),
     );
   }
 
@@ -516,14 +755,24 @@ class _AnimationPageState extends State<AnimationPage> {
           children: [
             Row(
               children: [
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _showVerses,
-                  child: const Text('Show Verses'),
+                  icon: const Icon(Icons.menu_book),
+                  label: const Text('Verses'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ),
                 ),
-                const SizedBox(width: 20),
-                ElevatedButton(
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
                   onPressed: _showAdditionalInfo,
-                  child: Text(steps[_currentStep].additionalText),
+                  icon: const Icon(Icons.info_outline),
+                  label: Text(steps[_currentStep].additionalText),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ),
                 ),
               ],
             ),
@@ -648,41 +897,3 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 }
-
-// class CustomSwitch extends StatelessWidget {
-//   final bool value;
-//   final ValueChanged<bool> onChanged;
-
-//   const CustomSwitch({required this.value, required this.onChanged, super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: () => onChanged(!value),
-//       child: Container(
-//         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(20.0),
-//           color: value ? Colors.blue : Colors.grey,
-//         ),
-//         child: Row(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             Text(
-//               value ? 'Show All' : 'Show Step',
-//               style: const TextStyle(color: Colors.white),
-//             ),
-//             const SizedBox(width: 8.0),
-//             Switch(
-//               value: value,
-//               onChanged: onChanged,
-//               activeColor: Colors.white,
-//               inactiveThumbColor: Colors.white,
-//               inactiveTrackColor: Colors.grey,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
