@@ -8,9 +8,9 @@ class AIPracticeProvider with ChangeNotifier {
   final OpenAIService _openAIService = OpenAIService();
   ChatSession? _currentSession;
   ChatSession? _lastSession;
-  List<Question> _questions = questionData;
+  final List<Question> _questions = questionData;
   List<Question> _filteredQuestions = questionData;
-  Set<String> _selectedTags = {};
+  final Set<String> _selectedTags = {};
   String _searchQuery = '';
   bool _isLoading = false;
 

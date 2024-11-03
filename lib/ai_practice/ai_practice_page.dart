@@ -123,6 +123,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                 itemCount: aiProvider.currentSession!.messages.length,
                 itemBuilder: (context, index) {
                   final message = aiProvider.currentSession!.messages[index];
+                  print(message.content);
                   return Align(
                     alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
@@ -135,7 +136,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                         color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(message.content),
+                      child: RichText(text: TextSpan(text: message.content)),
                     ),
                   );
                 },
