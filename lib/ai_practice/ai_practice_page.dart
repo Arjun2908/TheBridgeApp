@@ -247,30 +247,107 @@ class _AIPracticePageState extends State<AIPracticePage> {
   }
 
   Widget _buildPersonalitySelector(AIPracticeProvider aiProvider) {
+    final personalities = [
+      {
+        'type': 'skeptic',
+        'icon': Icons.psychology,
+        'description': 'Questions beliefs and seeks evidence',
+      },
+      {
+        'type': 'seeker',
+        'icon': Icons.search,
+        'description': 'Curious and open to exploring faith',
+      },
+      {
+        'type': 'atheist',
+        'icon': Icons.not_interested,
+        'description': 'Does not believe in any deity',
+      },
+      {
+        'type': 'religious',
+        'icon': Icons.church,
+        'description': 'Has strong religious convictions',
+      },
+    ];
+
     return Center(
-      child: Card(
-        margin: const EdgeInsets.all(16.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Select a personality to start chatting',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Choose Your Conversation Partner',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: ['skeptic', 'seeker', 'atheist', 'religious'].map((personality) {
-                  return ElevatedButton(
-                    onPressed: () => aiProvider.startNewSession(personality),
-                    child: Text(personality.capitalize()),
-                  );
-                }).toList(),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Select a personality type to practice your conversations',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.85,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: personalities.length,
+              itemBuilder: (context, index) {
+                final personality = personalities[index];
+                return Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: InkWell(
+                    onTap: () => aiProvider.startNewSession(personality['type'] as String),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            personality['icon'] as IconData,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            (personality['type'] as String).capitalize(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            personality['description'] as String,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
