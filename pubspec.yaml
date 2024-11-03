@@ -99,11 +99,15 @@ flutter:
     - assets/audio/audio_step_18.mp3
     - assets/audio/audio_step_19.mp3
     - assets/illustrations/welcome.svg
+    - assets/illustrations/onboarding_welcome.svg
     - assets/illustrations/personality.svg
     - assets/illustrations/conversation.svg
     - assets/illustrations/question_bank.svg
     - assets/illustrations/no_notes.svg
     - assets/illustrations/no_matches.svg
+    - assets/illustrations/onboarding_conversation.svg
+    - assets/illustrations/notes.svg
+    - assets/illustrations/resources.svg
     - assets/illustrations/loading_notes.svg
     - .env
 

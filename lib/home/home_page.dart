@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:the_bridge_app/global_helpers.dart';
 import 'package:the_bridge_app/bottom_nav_bar.dart';
 import 'package:the_bridge_app/widgets/common_app_bar.dart';
+import 'package:the_bridge_app/widgets/app_onboarding_modal.dart';
+import 'package:the_bridge_app/feedback_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowOnboarding(context);
+    });
+  }
 
   Widget _buildAnimatedCard({
     required Widget child,
@@ -36,6 +52,19 @@ class HomePage extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _checkAndShowOnboarding(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenOnboarding = prefs.getBool('hasSeenAppOnboarding') ?? false;
+
+    if (!hasSeenOnboarding && context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AppOnboardingModal(),
+      );
+    }
   }
 
   @override
@@ -112,13 +141,13 @@ class HomePage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildAnimatedCard(
-                      onTap: () => onItemTapped(2, context),
+                      onTap: () => Navigator.pushNamed(context, '/settings'),
                       child: Column(
                         children: [
-                          const Icon(Icons.chat_bubble_outline),
+                          const Icon(Icons.settings_outlined),
                           const SizedBox(height: 8),
                           Text(
-                            'Practice with AI',
+                            'Settings',
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -128,13 +157,19 @@ class HomePage extends StatelessWidget {
                   ),
                   Expanded(
                     child: _buildAnimatedCard(
-                      onTap: () => onItemTapped(3, context),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const AppOnboardingModal(),
+                        );
+                      },
                       child: Column(
                         children: [
-                          const Icon(Icons.library_books_outlined),
+                          const Icon(Icons.help_outline),
                           const SizedBox(height: 8),
                           Text(
-                            'Resources',
+                            'Show Tutorial',
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -146,14 +181,18 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _buildAnimatedCard(
-                onTap: () => onItemTapped(1, context),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const FeedbackPage(),
+                  ));
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.note_alt_outlined),
+                    const Icon(Icons.feedback_outlined),
                     const SizedBox(width: 8),
                     Text(
-                      'Your Notes',
+                      'Send Feedback',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],

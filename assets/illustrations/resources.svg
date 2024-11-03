@@ -1,0 +1,12 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="120" cy="120" r="100" fill="#BBDEFB"/>
+    
+    <!-- Books Stack -->
+    <rect x="60" y="140" width="120" height="30" rx="4" fill="#1976D2"/>
+    <rect x="65" y="120" width="120" height="30" rx="4" fill="#1E88E5"/>
+    <rect x="70" y="100" width="120" height="30" rx="4" fill="#2196F3"/>
+    
+    <!-- Bookmark -->
+    <path d="M110 70L130 70L130 110L120 100L110 110L110 70Z" fill="#1565C0"/>
+</svg>

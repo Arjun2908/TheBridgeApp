@@ -7,6 +7,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import 'package:the_bridge_app/providers/settings_provider.dart';
 import 'package:the_bridge_app/settings/helpers.dart';
+import 'package:the_bridge_app/widgets/app_onboarding_modal.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -220,6 +221,24 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
               ),
+              Card(
+                elevation: 3,
+                child: ListTile(
+                  title: const Text('Show App Tutorial'),
+                  leading: const Icon(Icons.help_outline),
+                  onTap: () async {
+                    await settingsProvider.resetOnboarding();
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const AppOnboardingModal(),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           );
         },

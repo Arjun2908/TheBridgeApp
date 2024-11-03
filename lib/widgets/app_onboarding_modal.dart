@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OnboardingStep {
+class AppOnboardingStep {
   final String title;
   final String description;
   final IconData icon;
   final String illustration;
 
-  OnboardingStep({
+  AppOnboardingStep({
     required this.title,
     required this.description,
     required this.icon,
@@ -16,41 +16,41 @@ class OnboardingStep {
   });
 }
 
-class OnboardingModal extends StatefulWidget {
-  const OnboardingModal({super.key});
+class AppOnboardingModal extends StatefulWidget {
+  const AppOnboardingModal({super.key});
 
   @override
-  State<OnboardingModal> createState() => _OnboardingModalState();
+  State<AppOnboardingModal> createState() => _AppOnboardingModalState();
 }
 
-class _OnboardingModalState extends State<OnboardingModal> {
+class _AppOnboardingModalState extends State<AppOnboardingModal> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingStep> steps = [
-    OnboardingStep(
-      title: 'Welcome to AI Practice',
-      description: 'Practice sharing your faith with our AI assistant. Choose different personalities to simulate real conversations.',
+  final List<AppOnboardingStep> steps = [
+    AppOnboardingStep(
+      title: 'Welcome to The Bridge App',
+      description: 'Share your faith using the Bridge illustration method.',
+      icon: Icons.home,
+      illustration: 'assets/illustrations/onboarding_welcome.svg',
+    ),
+    AppOnboardingStep(
+      title: 'Practice with AI',
+      description: 'Practice sharing your faith with our AI assistant in different scenarios.',
       icon: Icons.chat,
-      illustration: 'assets/illustrations/welcome.svg',
+      illustration: 'assets/illustrations/onboarding_conversation.svg',
     ),
-    OnboardingStep(
-      title: 'Choose a Personality',
-      description: 'Start by selecting a personality type (skeptic, seeker, atheist, or religious) to practice with different perspectives.',
-      icon: Icons.person_outline,
-      illustration: 'assets/illustrations/personality.svg',
+    AppOnboardingStep(
+      title: 'Take Notes',
+      description: 'Keep track of your conversations and insights as you share your faith and access them directly when you need them while sharing your faith.',
+      icon: Icons.note,
+      illustration: 'assets/illustrations/notes.svg',
     ),
-    OnboardingStep(
-      title: 'Practice Conversations',
-      description: 'Have natural conversations about faith. The AI will respond based on the selected personality type.',
-      icon: Icons.question_answer,
-      illustration: 'assets/illustrations/conversation.svg',
-    ),
-    OnboardingStep(
-      title: 'Use the Question Bank',
-      description: 'Access common questions and answers to help guide your conversations. You can use these directly in your chat.',
+    AppOnboardingStep(
+      title: 'Access Resources',
+      description: 'Find helpful materials, guides, and references to support your faith sharing journey.',
       icon: Icons.library_books,
-      illustration: 'assets/illustrations/question_bank.svg',
+      illustration: 'assets/illustrations/resources.svg',
     ),
   ];
 
@@ -149,7 +149,7 @@ class _OnboardingModalState extends State<OnboardingModal> {
                         );
                       } else {
                         SharedPreferences.getInstance().then((prefs) {
-                          prefs.setBool('hasSeenAIPracticeOnboarding', true);
+                          prefs.setBool('hasSeenAppOnboarding', true);
                         });
                         Navigator.of(context).pop();
                       }

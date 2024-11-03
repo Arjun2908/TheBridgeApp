@@ -1,0 +1,33 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="120" cy="120" r="100" fill="#BBDEFB"/>
+    
+    <!-- Bridge -->
+    <path d="M40 140 C40 90 200 90 200 140" 
+          stroke="#1976D2" 
+          stroke-width="16" 
+          stroke-linecap="round"
+          fill="none"/>
+          
+    <!-- People -->
+    <circle cx="70" cy="120" r="15" fill="#1976D2"/>
+    <path d="M70 140 L70 170" stroke="#1976D2" stroke-width="10" stroke-linecap="round"/>
+    <path d="M50 150 L90 150" stroke="#1976D2" stroke-width="10" stroke-linecap="round"/>
+    
+    <circle cx="170" cy="120" r="15" fill="#1565C0"/>
+    <path d="M170 140 L170 170" stroke="#1565C0" stroke-width="10" stroke-linecap="round"/>
+    <path d="M150 150 L190 150" stroke="#1565C0" stroke-width="10" stroke-linecap="round"/>
+    
+    <!-- Cross - Traditional proportions -->
+    <path d="M115 40H125V80H155V95H125V160H115V95H85V80H115V40Z" 
+          fill="#1976D2"/>
+    
+    <!-- Optional: Add subtle shadow for depth -->
+    <path d="M40 140 C40 90 200 90 200 140" 
+          stroke="#1565C0" 
+          stroke-width="20" 
+          stroke-linecap="round"
+          fill="none"
+          opacity="0.3"
+          transform="translate(0, 4)"/>
+</svg>

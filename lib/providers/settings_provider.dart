@@ -1,6 +1,7 @@
 // lib/providers/settings_provider.dart
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsProvider with ChangeNotifier {
   final Box _settingsBox = Hive.box('settings');
@@ -44,6 +45,12 @@ class SettingsProvider with ChangeNotifier {
 
   Future<void> resetSettings() async {
     await _settingsBox.clear();
+    notifyListeners();
+  }
+
+  Future<void> resetOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('hasSeenAppOnboarding', false);
     notifyListeners();
   }
 }
