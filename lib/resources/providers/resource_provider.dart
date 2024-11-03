@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/resource.dart';
-import '../data/resource_data.dart';
+
+import 'package:the_bridge_app/resources/models/resource.dart';
+import 'package:the_bridge_app/resources/data/resource_data.dart';
 
 class ResourceProvider with ChangeNotifier {
   List<Resource> getResourcesByType(ResourceType type) {

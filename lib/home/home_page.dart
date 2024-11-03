@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:the_bridge_app/bottom_nav_bar.dart';
+
 import 'package:the_bridge_app/global_helpers.dart';
+import 'package:the_bridge_app/bottom_nav_bar.dart';
 import 'package:the_bridge_app/widgets/common_app_bar.dart';
 
 class HomePage extends StatelessWidget {

@@ -1,18 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
+
 import 'package:share_plus/share_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
+import 'package:scribble/scribble.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 import 'package:the_bridge_app/models/note.dart';
 import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
-import 'package:video_player/video_player.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:scribble/scribble.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:the_bridge_app/global_helpers.dart';
-import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
 
 import 'consts.dart';
 

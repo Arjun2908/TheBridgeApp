@@ -1,4 +1,4 @@
-import '../models/resource.dart';
+import 'package:the_bridge_app/resources/models/resource.dart';
 
 final List<Resource> resourceData = [
   Resource(

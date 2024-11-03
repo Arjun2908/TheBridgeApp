@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:the_bridge_app/bottom_nav_bar.dart';
+
 import 'package:url_launcher/url_launcher.dart';
-import 'package:the_bridge_app/widgets/common_app_bar.dart';
-import '../providers/resource_provider.dart';
-import '../models/resource.dart';
+import 'package:provider/provider.dart';
+
+import 'package:the_bridge_app/resources/providers/resource_provider.dart';
+import 'package:the_bridge_app/resources/models/resource.dart';
 import 'package:the_bridge_app/global_helpers.dart';
+
+import 'package:the_bridge_app/bottom_nav_bar.dart';
+import 'package:the_bridge_app/widgets/common_app_bar.dart';
 
 class ResourceLibraryPage extends StatefulWidget {
   const ResourceLibraryPage({super.key});

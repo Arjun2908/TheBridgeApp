@@ -32,6 +32,7 @@ class OpenAIService {
     // Replace various Unicode quote variants with standard quotes
     final quoteVariants = {
       '"': '"', // Unicode left double quotation mark (U+201C)
+      // ignore: equal_keys_in_map
       '"': '"', // Unicode right double quotation mark (U+201D)
       '«': '"', // Double left-pointing angle quotation mark
       '»': '"', // Double right-pointing angle quotation mark

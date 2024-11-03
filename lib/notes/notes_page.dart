@@ -2,12 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:the_bridge_app/models/note.dart';
+import 'package:the_bridge_app/providers/notes_provider.dart';
+
 import 'package:the_bridge_app/bottom_nav_bar.dart';
-import '../models/note.dart';
-import '../providers/notes_provider.dart';
 import 'package:the_bridge_app/global_helpers.dart';
 import 'package:the_bridge_app/widgets/common_app_bar.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
