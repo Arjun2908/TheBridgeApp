@@ -7,6 +7,7 @@ import 'providers/ai_practice_provider.dart';
 import 'data/question_data.dart';
 import 'widgets/onboarding_modal.dart';
 import '../widgets/common_app_bar.dart';
+import 'widgets/typing_indicator.dart';
 
 class AIPracticePage extends StatefulWidget {
   const AIPracticePage({super.key});
@@ -93,6 +94,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
         return Column(
           children: [
             Container(
+              margin: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceVariant,
@@ -120,10 +122,12 @@ class _AIPracticePageState extends State<AIPracticePage> {
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(8.0),
-                itemCount: aiProvider.currentSession!.messages.length,
+                itemCount: aiProvider.currentSession!.messages.length + (aiProvider.isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
+                  if (index == aiProvider.currentSession!.messages.length && aiProvider.isLoading) {
+                    return const TypingIndicator();
+                  }
                   final message = aiProvider.currentSession!.messages[index];
-                  print(message.content);
                   return Align(
                     alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
@@ -136,7 +140,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                         color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: RichText(text: TextSpan(text: message.content)),
+                      child: Text(message.content),
                     ),
                   );
                 },

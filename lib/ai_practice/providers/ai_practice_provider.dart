@@ -104,6 +104,7 @@ class AIPracticeProvider with ChangeNotifier {
         isUser: true,
         timestamp: DateTime.now(),
       ));
+      notifyListeners();
 
       final response = await _openAIService.getChatResponse(
         _currentSession!.messages.map((m) => m.toMap()).toList(),
