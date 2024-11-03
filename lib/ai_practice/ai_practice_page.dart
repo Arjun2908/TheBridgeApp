@@ -64,8 +64,26 @@ class _AIPracticePageState extends State<AIPracticePage> {
           ],
           bottom: TabBar(
             tabs: const [
-              Tab(text: 'Practice Mode'),
-              Tab(text: 'Question Bank'),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.chat_bubble_outline),
+                    SizedBox(width: 8),
+                    Text('Practice Mode'),
+                  ],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.library_books_outlined),
+                    SizedBox(width: 8),
+                    Text('Question Bank'),
+                  ],
+                ),
+              ),
             ],
             indicatorWeight: 3,
             labelStyle: const TextStyle(fontWeight: FontWeight.bold),

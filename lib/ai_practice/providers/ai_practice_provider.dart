@@ -25,13 +25,48 @@ class AIPracticeProvider with ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   // Chat Session methods
-  void startNewSession(String personality) {
+  Future<void> startNewSession(String personality) async {
+    _isLoading = true;
     _currentSession = ChatSession(
       personality: personality,
       messages: [],
       startTime: DateTime.now(),
     );
     notifyListeners();
+
+    // Create initial message based on personality
+    String initialPrompt;
+    switch (personality.toLowerCase()) {
+      case 'skeptic':
+        initialPrompt = "I've always found religious claims hard to believe without concrete evidence. What makes you so sure Christianity is true?";
+        break;
+      case 'seeker':
+        initialPrompt = "I've been thinking a lot about spiritual things lately. What drew you to Christianity?";
+        break;
+      case 'atheist':
+        initialPrompt = "I don't believe in any gods or supernatural things. It's all just myths and stories to me. Why do you believe?";
+        break;
+      case 'religious':
+        initialPrompt = "I follow a different faith tradition, but I'm curious about Christianity. What makes it different from other religions?";
+        break;
+      default:
+        initialPrompt = "Hi, I'm interested in hearing about your faith. Can you tell me more?";
+    }
+
+    try {
+      _currentSession!.messages.add(ChatMessage(
+        content: initialPrompt,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> endCurrentSession() async {
