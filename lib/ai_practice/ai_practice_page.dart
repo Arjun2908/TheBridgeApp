@@ -20,13 +20,35 @@ class _AIPracticePageState extends State<AIPracticePage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> _chatHistory = [];
+  bool _showScrollToBottom = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowOnboarding();
+      _scrollToBottom();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.hasClients) {
+      final isAtBottom = _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100;
+      if (_showScrollToBottom != !isAtBottom) {
+        setState(() {
+          _showScrollToBottom = !isAtBottom;
+        });
+      }
+    }
   }
 
   Future<void> _checkAndShowOnboarding() async {
@@ -109,98 +131,115 @@ class _AIPracticePageState extends State<AIPracticePage> {
         if (aiProvider.currentSession == null) {
           return _buildPersonalitySelector(aiProvider);
         }
-        return Column(
+        return Stack(
           children: [
-            Container(
-              margin: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Talking to: ${aiProvider.currentSession!.personality.capitalize()}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+            Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.stop, size: 20),
-                    label: const Text('End Chat'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                    onPressed: () => _showEndChatDialog(aiProvider),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(8.0),
-                itemCount: aiProvider.currentSession!.messages.length + (aiProvider.isLoading ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == aiProvider.currentSession!.messages.length && aiProvider.isLoading) {
-                    return const TypingIndicator();
-                  }
-                  final message = aiProvider.currentSession!.messages[index];
-                  return Align(
-                    alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Talking to: ${aiProvider.currentSession!.personality.capitalize()}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      margin: const EdgeInsets.symmetric(vertical: 4.0),
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(message.content),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, -1),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        hintText: 'Type your message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
+                      TextButton.icon(
+                        icon: const Icon(Icons.stop, size: 20),
+                        label: const Text('End Chat'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.error,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                        onPressed: () => _showEndChatDialog(aiProvider),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: aiProvider.currentSession!.messages.length + (aiProvider.isLoading ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == aiProvider.currentSession!.messages.length && aiProvider.isLoading) {
+                        return const TypingIndicator();
+                      }
+                      final message = aiProvider.currentSession!.messages[index];
+                      return Align(
+                        alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.8,
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 4.0),
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(message.content),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, -1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: InputDecoration(
+                            hintText: 'Type your message...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      FloatingActionButton(
+                        onPressed: () => _sendMessage(aiProvider),
+                        child: const Icon(Icons.send),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  FloatingActionButton(
-                    onPressed: () => _sendMessage(aiProvider),
-                    child: const Icon(Icons.send),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (_showScrollToBottom)
+              Positioned(
+                right: 16,
+                bottom: 80, // Above the input box
+                child: FloatingActionButton.small(
+                  onPressed: _scrollToBottom,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
           ],
         );
       },
@@ -439,15 +478,13 @@ class _AIPracticePageState extends State<AIPracticePage> {
   }
 
   void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 }
 
