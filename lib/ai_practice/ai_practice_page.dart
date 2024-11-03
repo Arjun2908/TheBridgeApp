@@ -381,14 +381,26 @@ class _AIPracticePageState extends State<AIPracticePage> {
       builder: (context, aiProvider, child) {
         return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            // Search Bar
+            Container(
+              margin: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search questions...',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
@@ -396,12 +408,18 @@ class _AIPracticePageState extends State<AIPracticePage> {
                 onChanged: aiProvider.setSearchQuery,
               ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: availableTags.map((tag) {
-                  bool isSelected = aiProvider.selectedTags.contains(tag);
+
+            // Tags Scrolling Section
+            Container(
+              height: 50,
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: availableTags.length,
+                itemBuilder: (context, index) {
+                  final tag = availableTags[index];
+                  final isSelected = aiProvider.selectedTags.contains(tag);
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: FilterChip(
@@ -411,49 +429,77 @@ class _AIPracticePageState extends State<AIPracticePage> {
                       showCheckmark: false,
                       labelStyle: TextStyle(
                         color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                       selectedColor: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                   );
-                }).toList(),
+                },
               ),
             ),
+
+            // Active Chat Banner
             if (aiProvider.currentSession != null)
-              InkWell(
-                onTap: () => DefaultTabController.of(context).animateTo(0),
-                child: Container(
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Material(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => DefaultTabController.of(context).animateTo(0),
                     borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Active chat with: ${aiProvider.currentSession!.personality.capitalize()}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.chat_bubble_outline,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Active Conversation',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  'Chatting with ${aiProvider.currentSession!.personality.capitalize()}',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
-                        ),
+                        ],
                       ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
+
+            // Questions List
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -462,66 +508,85 @@ class _AIPracticePageState extends State<AIPracticePage> {
                   final question = aiProvider.questions[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12.0),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ExpansionTile(
-                      title: Text(
-                        question.question,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                       ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                question.answer,
-                                style: const TextStyle(height: 1.5),
-                              ),
-                              const SizedBox(height: 16),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: question.tags
-                                    .map((tag) => Chip(
-                                          label: Text(
-                                            tag,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                            ),
-                                          ),
-                                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                                          padding: EdgeInsets.zero,
-                                        ))
-                                    .toList(),
-                              ),
-                              if (aiProvider.currentSession != null) ...[
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  icon: const Icon(Icons.add_comment),
-                                  label: const Text('Use in Current Chat'),
-                                  style: ElevatedButton.styleFrom(
-                                    minimumSize: const Size(double.infinity, 48),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    aiProvider.useQuestionInChat(question);
-                                    DefaultTabController.of(context).animateTo(0);
-                                  },
-                                ),
-                              ],
-                            ],
+                    ),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent,
+                      ),
+                      child: ExpansionTile(
+                        title: Text(
+                          question.question,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
-                      ],
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    question.answer,
+                                    style: const TextStyle(height: 1.5),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: question.tags
+                                      .map((tag) => Chip(
+                                            label: Text(
+                                              tag,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                            ),
+                                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ))
+                                      .toList(),
+                                ),
+                                if (aiProvider.currentSession != null) ...[
+                                  const SizedBox(height: 16),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.add_comment, size: 20),
+                                    label: const Text('Use in Current Chat'),
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(double.infinity, 48),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      aiProvider.useQuestionInChat(question);
+                                      DefaultTabController.of(context).animateTo(0);
+                                    },
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
