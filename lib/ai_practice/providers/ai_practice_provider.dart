@@ -51,19 +51,35 @@ class AIPracticeProvider with ChangeNotifier {
   Future<void> useQuestionInChat(Question question) async {
     if (_currentSession == null) return;
 
-    _currentSession!.messages.add(ChatMessage(
-      content: question.question,
-      isUser: true,
-      timestamp: DateTime.now(),
-    ));
-
-    _currentSession!.messages.add(ChatMessage(
-      content: question.answer,
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
-
+    _isLoading = true;
     notifyListeners();
+
+    try {
+      _currentSession!.messages.add(ChatMessage(
+        content: question.answer,
+        isUser: true,
+        timestamp: DateTime.now(),
+      ));
+      notifyListeners();
+
+      final response = await _openAIService.getChatResponse(
+        _currentSession!.messages.map((m) => m.toMap()).toList(),
+        _currentSession!.personality,
+      );
+
+      _currentSession!.messages.add(ChatMessage(
+        content: response,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   // Question Bank methods
