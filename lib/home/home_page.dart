@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:the_bridge_app/about/about_page.dart';
 
 import 'package:the_bridge_app/global_helpers.dart';
 import 'package:the_bridge_app/bottom_nav_bar.dart';
@@ -141,13 +142,15 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Expanded(
                     child: _buildAnimatedCard(
-                      onTap: () => Navigator.pushNamed(context, '/settings'),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const AboutPage(),
+                      )),
                       child: Column(
                         children: [
-                          const Icon(Icons.settings_outlined),
+                          const Icon(Icons.info_outline),
                           const SizedBox(height: 8),
                           Text(
-                            'Settings',
+                            'About',
                             style: Theme.of(context).textTheme.titleMedium,
                             textAlign: TextAlign.center,
                           ),

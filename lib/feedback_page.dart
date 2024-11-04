@@ -167,7 +167,6 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                 ],
 
                 // Feedback Input Section
-                const SizedBox(height: 16),
                 Text(
                   'Your feedback',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -192,7 +191,7 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 45,
                   child: FilledButton.icon(
                     onPressed: _isSubmitting ? null : _submitFeedback,
                     icon: _isSubmitting

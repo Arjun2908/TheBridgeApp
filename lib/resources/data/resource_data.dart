@@ -1,26 +1,32 @@
 import 'package:the_bridge_app/resources/models/resource.dart';
 
+// How to read the Bible - https://youtu.be/plSNIwhAn5o?si=lMCEmyouNdXl1Bo_
+// If You’re Struggling With What to Pray About, Watch This
+//  - https://www.youtube.com/watch?v=3-YlqQfKkKk
+// How Can You Know What’s Right? Here’s What Jesus Thought. - https://www.youtube.com/watch?v=KUil1m3P2iI
+// The Gospel - https://youtu.be/xrzq_X1NNaA?si=3SdDIvqiaKCDkAQu
+
 final List<Resource> resourceData = [
   Resource(
     id: 'v1',
-    title: 'The Bridge Illustration Training',
-    description: 'Learn how to effectively share the gospel using the Bridge Illustration method',
+    title: 'How to read the Bible',
+    description: 'Learn how to read the Bible for yourself',
     type: ResourceType.video,
-    url: 'https://www.youtube.com/watch?v=yv7KJQHWcqo',
+    url: 'https://youtu.be/plSNIwhAn5o?si=lMCEmyouNdXl1Bo_',
   ),
   Resource(
     id: 'v2',
-    title: 'Navigators Bridge Illustration',
-    description: 'The classic Bridge presentation by the Navigators ministry',
+    title: 'The Gospel',
+    description: 'Learn the basics of the Christian faith',
     type: ResourceType.video,
-    url: 'https://www.youtube.com/watch?v=_Yf7VUo8YyY',
+    url: 'https://youtu.be/xrzq_X1NNaA?si=3SdDIvqiaKCDkAQu',
   ),
   Resource(
     id: 'v3',
-    title: 'Practice Presentation Example',
-    description: 'Watch a real-world example of sharing the Bridge Illustration',
+    title: 'If You’re Struggling With What to Pray About, Watch This',
+    description: 'Exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount',
     type: ResourceType.video,
-    url: 'https://www.youtube.com/watch?v=vZkYxwZMRUk',
+    url: 'https://youtu.be/3-YlqQfKkKk?si=SGII-rGFYTgScV5m',
   ),
   Resource(
     id: 'sg1',
@@ -35,12 +41,5 @@ final List<Resource> resourceData = [
     description: 'Interactive workbook for practicing and memorizing the Bridge presentation',
     type: ResourceType.studyGuide,
     url: 'https://www.navigators.org/resource/the-bridge-to-life/',
-  ),
-  Resource(
-    id: 'sg3',
-    title: 'Scripture Reference Sheet',
-    description: 'Quick reference guide for all Bible verses used in the Bridge Illustration',
-    type: ResourceType.studyGuide,
-    url: 'https://www.navigators.org/resource/bridge-illustration/',
   ),
 ];
