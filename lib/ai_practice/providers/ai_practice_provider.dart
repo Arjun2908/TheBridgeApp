@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:the_bridge_app/ai_practice/models/chat_session.dart';
 import 'package:the_bridge_app/ai_practice/services/openai_service.dart';
@@ -13,6 +15,35 @@ class AIPracticeProvider with ChangeNotifier {
   final Set<String> _selectedTags = {};
   String _searchQuery = '';
   bool _isLoading = false;
+  bool _isInitializing = true;
+
+  AIPracticeProvider() {
+    _loadSession();
+  }
+
+  Future<void> _loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionJson = prefs.getString('currentSession');
+    if (sessionJson != null) {
+      try {
+        final sessionMap = json.decode(sessionJson);
+        _currentSession = ChatSession.fromMap(sessionMap);
+      } catch (e) {
+        await prefs.remove('currentSession');
+      }
+    }
+    _isInitializing = false;
+    notifyListeners();
+  }
+
+  Future<void> _saveSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_currentSession != null) {
+      await prefs.setString('currentSession', json.encode(_currentSession!.toMap()));
+    } else {
+      await prefs.remove('currentSession');
+    }
+  }
 
   // Chat Session getters
   ChatSession? get currentSession => _currentSession;
@@ -32,6 +63,7 @@ class AIPracticeProvider with ChangeNotifier {
       messages: [],
       startTime: DateTime.now(),
     );
+    await _saveSession();
     notifyListeners();
 
     // Create initial message based on personality
@@ -79,6 +111,7 @@ class AIPracticeProvider with ChangeNotifier {
       );
       _lastSession = endedSession;
       _currentSession = null;
+      await _saveSession();
       notifyListeners();
     }
   }
@@ -144,18 +177,21 @@ class AIPracticeProvider with ChangeNotifier {
     }).toList();
   }
 
-  Future<String> sendMessage(String message) async {
-    if (_currentSession == null) return '';
-    _isLoading = true;
-    notifyListeners();
+  Future<void> sendMessage(String message, {Function? onMessageSent}) async {
+    if (_currentSession == null) return;
 
     try {
+      _isLoading = true;
+      notifyListeners();
+
       _currentSession!.messages.add(ChatMessage(
         content: message,
         isUser: true,
         timestamp: DateTime.now(),
       ));
+      await _saveSession();
       notifyListeners();
+      if (onMessageSent != null) onMessageSent();
 
       final response = await _openAIService.getChatResponse(
         _currentSession!.messages.map((m) => m.toMap()).toList(),
@@ -167,14 +203,16 @@ class AIPracticeProvider with ChangeNotifier {
         isUser: false,
         timestamp: DateTime.now(),
       ));
-
+      await _saveSession();
       _isLoading = false;
       notifyListeners();
-      return response;
+      if (onMessageSent != null) onMessageSent();
     } catch (e) {
       _isLoading = false;
       notifyListeners();
       rethrow;
     }
   }
+
+  bool get isInitializing => _isInitializing;
 }

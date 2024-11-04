@@ -133,9 +133,16 @@ class _AIPracticePageState extends State<AIPracticePage> {
   Widget _buildPracticeMode() {
     return Consumer<AIPracticeProvider>(
       builder: (context, aiProvider, child) {
+        if (aiProvider.isInitializing) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         if (aiProvider.currentSession == null) {
           return _buildPersonalitySelector(aiProvider);
         }
+
         return Stack(
           children: [
             Column(
@@ -608,13 +615,18 @@ class _AIPracticePageState extends State<AIPracticePage> {
 
     final userMessage = _messageController.text;
     _messageController.clear();
-    _scrollToBottom();
 
     try {
-      await aiProvider.sendMessage(userMessage);
-      if (mounted) {
-        _scrollToBottom();
-      }
+      await aiProvider.sendMessage(
+        userMessage,
+        onMessageSent: () {
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToBottom();
+            });
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
