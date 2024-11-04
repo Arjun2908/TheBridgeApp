@@ -75,7 +75,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
       length: 2,
       child: Scaffold(
         appBar: CommonAppBar(
-          title: 'AI Practice',
+          title: 'Practice',
           additionalActions: [
             IconButton(
               icon: const Icon(Icons.help_outline),

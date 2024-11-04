@@ -34,7 +34,7 @@ class BottomNavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.chat),
-          label: 'AI Practice',
+          label: 'Practice',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.library_books),
