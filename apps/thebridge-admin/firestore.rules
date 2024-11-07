@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only authenticated admins can write to resources
+    match /resources/{resourceId} {
+      allow read: allow true;  // Anyone can read resources
+      allow write: if request.auth != null 
+                  && request.auth.token.admin == true;  // Only admins can write
+    }
+  }
+} 
