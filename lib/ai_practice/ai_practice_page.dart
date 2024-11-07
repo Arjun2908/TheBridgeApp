@@ -304,57 +304,65 @@ class _AIPracticePageState extends State<AIPracticePage> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.85,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: personalities.length,
-              itemBuilder: (context, index) {
-                final personality = personalities[index];
-                return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final crossAxisCount = width > 900 ? 4 : (width > 600 ? 3 : 2);
+                final aspectRatio = width > 600 ? 1.1 : 0.85;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: aspectRatio,
+                    crossAxisSpacing: width > 600 ? 16 : 12,
+                    mainAxisSpacing: width > 600 ? 16 : 12,
                   ),
-                  child: InkWell(
-                    onTap: () => aiProvider.startNewSession(personality['type'] as String),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            personality['icon'] as IconData,
-                            size: 48,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            (personality['type'] as String).capitalize(),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            personality['description'] as String,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+                  itemCount: personalities.length,
+                  itemBuilder: (context, index) {
+                    final personality = personalities[index];
+                    return Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
-                  ),
+                      child: InkWell(
+                        onTap: () => aiProvider.startNewSession(personality['type'] as String),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                personality['icon'] as IconData,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                (personality['type'] as String).capitalize(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                personality['description'] as String,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
