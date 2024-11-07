@@ -450,7 +450,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                         color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       selectedColor: Theme.of(context).colorScheme.primary,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
@@ -555,7 +555,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -576,7 +576,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
                                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                                               ),
                                             ),
-                                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                             padding: const EdgeInsets.symmetric(horizontal: 4),
                                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ))

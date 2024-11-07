@@ -34,7 +34,7 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
         margin: const EdgeInsets.symmetric(vertical: 4.0),
         padding: const EdgeInsets.all(14.0),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
