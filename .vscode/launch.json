@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TheBridgeApp (debug mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "apps/TheBridgeApp/lib/main.dart"
+        },
+        {
+            "name": "TheBridgeApp (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "apps/TheBridgeApp/lib/main.dart"
+        },
+        {
+            "name": "TheBridgeApp (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "apps/TheBridgeApp/lib/main.dart"
+        },
+        {
+            "name": "TheBridgeApp (web)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "program": "apps/TheBridgeApp/lib/main.dart"
+        }
+    ]
+} 
