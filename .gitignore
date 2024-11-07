@@ -22,23 +22,23 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
+# Flutter/Dart/Pub related (adjusted for the new location)
+apps/TheBridgeApp/**/doc/api/
+apps/TheBridgeApp/**/ios/Flutter/.last_build_id
+apps/TheBridgeApp/.dart_tool/
+apps/TheBridgeApp/.flutter-plugins
+apps/TheBridgeApp/.flutter-plugins-dependencies
+apps/TheBridgeApp/.pub-cache/
+apps/TheBridgeApp/.pub/
+apps/TheBridgeApp/build/
 
 # Symbolication related
-app.*.symbols
+apps/TheBridgeApp/app.*.symbols
 
 # Obfuscation related
-app.*.map.json
+apps/TheBridgeApp/app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+apps/TheBridgeApp/android/app/debug
+apps/TheBridgeApp/android/app/profile
+apps/TheBridgeApp/android/app/release
