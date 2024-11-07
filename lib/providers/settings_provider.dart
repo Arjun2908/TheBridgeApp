@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsProvider with ChangeNotifier {
   final Box _settingsBox = Hive.box('settings');
 
-  bool get darkMode => _settingsBox.get('darkMode', defaultValue: false);
-  bool get useSystemTheme => _settingsBox.get('useSystemTheme', defaultValue: true);
+  bool get darkMode => _settingsBox.get('darkMode', defaultValue: true);
+  bool get useSystemTheme => _settingsBox.get('useSystemTheme', defaultValue: false);
   double get textSize => _settingsBox.get('textSize', defaultValue: 16.0);
   String get themeColorHex => _settingsBox.get('themeColorHex', defaultValue: '#2196F3');
 
