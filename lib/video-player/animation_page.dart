@@ -340,12 +340,18 @@ class _AnimationPageState extends State<AnimationPage> {
         if (passageProvider.passages != null) {
           return Column(
             children: [
-              _buildShareButton(
-                onPressed: () async {
-                  final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
-                  await Share.share('$versesText\n\nShared from The Bridge App');
-                },
-                text: 'Share Verses',
+              Builder(
+                builder: (context) => _buildShareButton(
+                  onPressed: () async {
+                    final versesText = passageProvider.passages!.map((passage) => passage.text).join('\n\n');
+                    final box = context.findRenderObject() as RenderBox?;
+                    await Share.share(
+                      '$versesText\n\nShared from The Bridge App',
+                      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                    );
+                  },
+                  text: 'Share Verses',
+                ),
               ),
               Expanded(
                 child: ListView(
