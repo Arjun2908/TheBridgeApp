@@ -20,7 +20,10 @@ import 'package:the_bridge_app/global_helpers.dart';
 
 import 'consts.dart';
 
-Future<void> shareFiles() async {
+Future<void> shareFiles(BuildContext context) async {
+  final box = context.findRenderObject() as RenderBox?;
+  final sharePositionOrigin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
   final ByteData byteData = await rootBundle.load('assets/bridge_diagram.png');
   final tempDir = await getTemporaryDirectory();
   final file = await File('${tempDir.path}/bridge_diagram.png').writeAsBytes(
@@ -28,7 +31,12 @@ Future<void> shareFiles() async {
   );
 
   final List<XFile> files = [XFile(file.path)];
-  Share.shareXFiles(files, fileNameOverrides: ['bridge_diagram.png']);
+
+  await Share.shareXFiles(
+    files,
+    fileNameOverrides: ['bridge_diagram.png'],
+    sharePositionOrigin: sharePositionOrigin,
+  );
 }
 
 class AnimationPage extends StatefulWidget {
@@ -50,6 +58,9 @@ class _AnimationPageState extends State<AnimationPage> {
   bool audioEnabled = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isAudioPlaying = false;
+
+  // Add a GlobalKey for the share button
+  final GlobalKey _shareButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -772,6 +783,26 @@ class _AnimationPageState extends State<AnimationPage> {
     );
   }
 
+  Future<void> shareFiles() async {
+    // Get the RenderBox from the share button's GlobalKey
+    final RenderBox? box = _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
+    final Rect? sharePositionOrigin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+    final ByteData byteData = await rootBundle.load('assets/bridge_diagram.png');
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/bridge_diagram.png').writeAsBytes(
+      byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+    );
+
+    final List<XFile> files = [XFile(file.path)];
+
+    await Share.shareXFiles(
+      files,
+      fileNameOverrides: ['bridge_diagram.png'],
+      sharePositionOrigin: sharePositionOrigin,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -803,9 +834,8 @@ class _AnimationPageState extends State<AnimationPage> {
               icon: const Icon(Icons.draw),
             ),
             IconButton(
-              onPressed: () {
-                shareFiles();
-              },
+              key: _shareButtonKey,
+              onPressed: shareFiles,
               icon: const Icon(Icons.share),
             ),
           ],
