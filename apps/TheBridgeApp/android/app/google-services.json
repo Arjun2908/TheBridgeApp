@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "572750242114",
+    "project_id": "thebridge-admin",
+    "storage_bucket": "thebridge-admin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:572750242114:android:e7df5a1fbd8aee9311e8db",
+        "android_client_info": {
+          "package_name": "com.thebridgeapp.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZN3TUqJCGg9eVUWEZvemlg1SWt0xQ1ho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -27,6 +27,14 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ResourceProvider>().fetchResources();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
@@ -82,6 +90,21 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
   }
 
   Widget _buildTabContent(BuildContext context, List<Resource> resources) {
+    if (context.watch<ResourceProvider>().isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (resources.isEmpty) {
+      return Center(
+        child: Text(
+          'No resources available',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: resources.length,

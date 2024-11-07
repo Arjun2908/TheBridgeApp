@@ -19,8 +19,15 @@ import 'package:the_bridge_app/resources/pages/resource_library_page.dart';
 import 'package:the_bridge_app/ai_practice/ai_practice_page.dart';
 import 'package:the_bridge_app/ai_practice/providers/ai_practice_provider.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await Hive.initFlutter();
   await Hive.openBox('settings');
   await dotenv.load(fileName: ".env");
