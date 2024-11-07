@@ -24,7 +24,6 @@ class AIPracticePage extends StatefulWidget {
 class _AIPracticePageState extends State<AIPracticePage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<Map<String, String>> _chatHistory = [];
   bool _showScrollToBottom = false;
 
   @override
