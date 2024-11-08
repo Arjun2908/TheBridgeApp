@@ -11,6 +11,7 @@ import 'package:the_bridge_app/providers/notes_provider.dart';
 import 'package:the_bridge_app/providers/passage_provider.dart';
 import 'package:the_bridge_app/providers/settings_provider.dart';
 import 'package:the_bridge_app/resources/providers/resource_provider.dart';
+import 'package:the_bridge_app/services/api_service.dart';
 
 import 'package:the_bridge_app/settings/settings_page.dart';
 import 'package:the_bridge_app/video-player/animation_page.dart';
@@ -20,6 +21,9 @@ import 'package:the_bridge_app/ai_practice/ai_practice_page.dart';
 import 'package:the_bridge_app/ai_practice/providers/ai_practice_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+
+import 'models/passage.dart';
+import 'models/cached_passage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +35,18 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('settings');
   await dotenv.load(fileName: ".env");
+
+  // Register Hive adapters
+  if (!Hive.isAdapterRegistered(3)) {
+    Hive.registerAdapter(PassageAdapter());
+  }
+  if (!Hive.isAdapterRegistered(4)) {
+    Hive.registerAdapter(CachedPassageAdapter());
+  }
+
+  // Initialize ApiService
+  final apiService = ApiService();
+  await apiService.init();
 
   runApp(const MyApp());
 }

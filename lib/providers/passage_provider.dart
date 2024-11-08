@@ -8,6 +8,14 @@ class PassagesProvider with ChangeNotifier {
   List<Passage> _passages = [];
   bool _isLoading = false;
 
+  PassagesProvider() {
+    _initApiService();
+  }
+
+  Future<void> _initApiService() async {
+    await _apiService.init();
+  }
+
   List<Passage>? get passages => _passages;
   bool get isLoading => _isLoading;
 

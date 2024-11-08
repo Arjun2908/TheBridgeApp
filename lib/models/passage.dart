@@ -1,5 +1,11 @@
 // models/passages.dart
+import 'package:hive/hive.dart';
+
+part 'passage.g.dart';
+
+@HiveType(typeId: 1)
 class Passage {
+  @HiveField(0)
   final String text;
 
   Passage({required this.text});
@@ -12,7 +18,6 @@ class Passage {
 
   static List<Passage> fromJsonList(Map<String, dynamic> json) {
     final List<dynamic> passageList = json['passages'];
-
     return passageList
         .map((passage) => Passage(
               text: _fixQuotes(passage),
