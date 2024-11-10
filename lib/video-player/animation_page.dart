@@ -65,23 +65,34 @@ class _AnimationPageState extends State<AnimationPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
-    // Initialize all controllers at once
+    // Create all controller references
     _controllers = List.generate(
       steps.length,
       (index) => VideoPlayerController.asset(steps[index].videoPath),
     );
 
-    // Initialize all controllers and set current controller
-    _initializeVideoPlayersFuture = Future.wait(
-      _controllers.map((controller) => controller.initialize()),
-    ).then((_) {
-      _currentController = _controllers[_currentStep];
-      _currentController.play();
-      setState(() {});
-    });
+    // Use different initialization strategies for Android and iOS
+    if (Platform.isAndroid) {
+      // Initialize only first few videos on Android
+      _initializeVideoPlayersFuture = _initializeControllerRange(0, 3).then((_) {
+        if (mounted) {
+          _currentController = _controllers[0];
+          _currentController.play();
+          setState(() {});
+        }
+      });
+    } else {
+      // Initialize all videos on iOS
+      _initializeVideoPlayersFuture = Future.wait(_controllers.map((controller) => controller.initialize())).then((_) {
+        if (mounted) {
+          _currentController = _controllers[0];
+          _currentController.play();
+          setState(() {});
+        }
+      });
+    }
 
     FToastBuilder();
 
@@ -91,6 +102,21 @@ class _AnimationPageState extends State<AnimationPage> {
         _isAudioPlaying = false;
       });
     });
+  }
+
+  Future<void> _initializeControllerRange(int start, int end) async {
+    // Ensure end doesn't exceed array bounds
+    end = end.clamp(0, steps.length);
+    // Ensure start is not negative
+    start = start.clamp(0, steps.length);
+
+    for (var i = start; i < end; i++) {
+      if (!_controllers[i].value.isInitialized) {
+        await _controllers[i].initialize().catchError((error) {
+          print('Error initializing video ${i}: $error');
+        });
+      }
+    }
   }
 
   Widget _buildDrawingToolbar() {
@@ -130,7 +156,9 @@ class _AnimationPageState extends State<AnimationPage> {
   void dispose() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     for (var controller in _controllers) {
-      controller.dispose();
+      if (controller.value.isInitialized) {
+        controller.dispose();
+      }
     }
     _scribbleNotifier.dispose();
     _audioPlayer.dispose();
@@ -144,20 +172,33 @@ class _AnimationPageState extends State<AnimationPage> {
         _isAudioPlaying = false;
       });
 
-      // Pause current video first
-      await _currentController.pause();
+      if (Platform.isAndroid) {
+        // Android-specific controller management
+        if (_currentStep >= 3) {
+          final disposeIndex = _currentStep - 3;
+          if (disposeIndex >= 0 && _controllers[disposeIndex].value.isInitialized) {
+            await _controllers[disposeIndex].dispose();
+            _controllers[disposeIndex] = VideoPlayerController.asset(steps[disposeIndex].videoPath);
+          }
+        }
 
-      // Prepare next video before showing it
+        // Initialize next few controllers
+        final nextStart = _currentStep + 1;
+        final nextEnd = (_currentStep + 4).clamp(0, steps.length);
+        await _initializeControllerRange(nextStart, nextEnd);
+      }
+
+      // Common logic for both platforms
+      await _currentController.pause();
       final nextController = _controllers[_currentStep + 1];
       await nextController.seekTo(Duration.zero);
-      await nextController.pause(); // Ensure it's paused at the start
+      await nextController.pause(); // Ensure video is paused at the start
 
       setState(() {
         _currentStep++;
         _currentController = nextController;
       });
 
-      // Start playing after state is updated
       _currentController.play();
 
       if (audioEnabled) {
@@ -173,20 +214,32 @@ class _AnimationPageState extends State<AnimationPage> {
         _isAudioPlaying = false;
       });
 
-      // Pause current video first
-      await _currentController.pause();
+      if (Platform.isAndroid) {
+        // Android-specific controller management
+        final prevStart = (_currentStep - 3).clamp(0, steps.length - 1);
+        final prevEnd = _currentStep.clamp(0, steps.length);
+        await _initializeControllerRange(prevStart, prevEnd);
 
-      // Prepare previous video before showing it
+        if (_currentStep < steps.length - 3) {
+          final disposeIndex = _currentStep + 3;
+          if (disposeIndex < steps.length && _controllers[disposeIndex].value.isInitialized) {
+            await _controllers[disposeIndex].dispose();
+            _controllers[disposeIndex] = VideoPlayerController.asset(steps[disposeIndex].videoPath);
+          }
+        }
+      }
+
+      // Common logic for both platforms
+      await _currentController.pause();
       final prevController = _controllers[_currentStep - 1];
       await prevController.seekTo(Duration.zero);
-      await prevController.pause(); // Ensure it's paused at the start
+      await prevController.pause(); // Ensure video is paused at the start
 
       setState(() {
         _currentStep--;
         _currentController = prevController;
       });
 
-      // Start playing after state is updated
       _currentController.play();
 
       if (audioEnabled) {
@@ -924,9 +977,43 @@ class _AnimationPageState extends State<AnimationPage> {
                   ),
                 ),
               );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Error loading video: ${snapshot.error}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          // Retry initialization
+                          _initializeVideoPlayersFuture = Future.wait(
+                            _controllers.map((controller) => controller.initialize()),
+                          ).then((_) {
+                            if (mounted) {
+                              _currentController = _controllers[_currentStep];
+                              _currentController.play();
+                              setState(() {});
+                            }
+                          });
+                        });
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
             } else {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                  ],
+                ),
               );
             }
           },
