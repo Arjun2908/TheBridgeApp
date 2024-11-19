@@ -8,6 +8,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:the_bridge_app/providers/settings_provider.dart';
 import 'package:the_bridge_app/settings/helpers.dart';
 import 'package:the_bridge_app/widgets/app_onboarding_modal.dart';
+import 'package:the_bridge_app/settings/share_app_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -182,6 +183,23 @@ class SettingsPage extends StatelessWidget {
                       builder: (context) => const FeedbackPage(),
                     ));
                   },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: ListTile(
+                  title: const Text('Share App'),
+                  leading: const Icon(Icons.share),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const ShareAppPage(),
+                    ));
+                  },
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
               ),
               const SizedBox(height: 16),
