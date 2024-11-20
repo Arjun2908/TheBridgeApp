@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,9 @@ import 'package:the_bridge_app/ai_practice/widgets/onboarding_modal.dart';
 import 'package:the_bridge_app/ai_practice/widgets/typing_indicator.dart';
 
 import 'package:the_bridge_app/ai_practice/data/question_data.dart';
+
+import 'package:the_bridge_app/providers/notes_provider.dart';
+import 'package:the_bridge_app/models/note.dart';
 
 class AIPracticePage extends StatefulWidget {
   const AIPracticePage({super.key});
@@ -212,19 +216,80 @@ class _AIPracticePageState extends State<AIPracticePage> {
                         return const TypingIndicator();
                       }
                       final message = aiProvider.currentSession!.messages[index];
-                      return Align(
-                        alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      return Dismissible(
+                        key: Key('message_${index}_${message.timestamp.millisecondsSinceEpoch}'),
+                        direction: message.isUser ? DismissDirection.startToEnd : DismissDirection.endToStart,
+                        background: Container(
+                          alignment: message.isUser ? Alignment.centerLeft : Alignment.centerRight,
+                          padding: EdgeInsets.only(
+                            left: message.isUser ? 24.0 : 0,
+                            right: message.isUser ? 0 : 24.0,
                           ),
-                          margin: const EdgeInsets.symmetric(vertical: 4.0),
-                          padding: const EdgeInsets.all(12.0),
-                          decoration: BoxDecoration(
-                            color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(16),
+                          color: Theme.of(context).colorScheme.surface,
+                          child: AnimatedBuilder(
+                            animation: DismissibleAnimation(ValueKey('message_${index}_${message.timestamp.millisecondsSinceEpoch}')),
+                            builder: (context, child) {
+                              return Row(
+                                mainAxisAlignment: message.isUser ? MainAxisAlignment.start : MainAxisAlignment.end,
+                                children: [
+                                  if (!message.isUser) ...[
+                                    Icon(
+                                      Icons.bookmark_outline,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Save as Note',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                  if (message.isUser) ...[
+                                    Text(
+                                      'Save as Note',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.bookmark_outline,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ],
+                                ],
+                              );
+                            },
                           ),
-                          child: Text(message.content),
+                        ),
+                        dismissThresholds: const {
+                          DismissDirection.endToStart: 0.3,
+                          DismissDirection.startToEnd: 0.3,
+                        },
+                        confirmDismiss: (direction) async {
+                          HapticFeedback.mediumImpact();
+                          await _saveMessageAsNote(message.content);
+                          return false;
+                        },
+                        child: Align(
+                          alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                          child: IntrinsicWidth(
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.8,
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 4.0),
+                              padding: const EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: message.isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(message.content),
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -717,6 +782,61 @@ class _AIPracticePageState extends State<AIPracticePage> {
       );
     }
   }
+
+  Future<void> _saveMessageAsNote(String content) async {
+    final note = Note(
+      content: content,
+      step: -1,
+      timestamp: DateTime.now(),
+    );
+
+    try {
+      await context.read<NotesProvider>().addNote(note);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  color: Theme.of(context).colorScheme.onInverseSurface,
+                ),
+                const SizedBox(width: 8),
+                const Text('Saved to notes'),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(width: 8),
+                const Text('Failed to save note'),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    }
+  }
 }
 
 extension StringExtension on String {
@@ -753,4 +873,34 @@ String _getPersonalityDescription(String personality) {
     default:
       return 'A conversation partner for faith discussions.';
   }
+}
+
+class DismissibleAnimation extends Animation<double> with AnimationLazyListenerMixin {
+  final Key dismissibleKey;
+
+  DismissibleAnimation(this.dismissibleKey);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  double get value => 0.0;
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) {}
+
+  @override
+  void didStartListening() {}
+
+  @override
+  void didStopListening() {}
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {}
+
+  @override
+  AnimationStatus get status => throw UnimplementedError();
 }
