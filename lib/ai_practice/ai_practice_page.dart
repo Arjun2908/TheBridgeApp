@@ -133,9 +133,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
     return Consumer<AIPracticeProvider>(
       builder: (context, aiProvider, child) {
         if (aiProvider.isInitializing) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (aiProvider.currentSession == null) {
@@ -146,27 +144,60 @@ class _AIPracticePageState extends State<AIPracticePage> {
           children: [
             Column(
               children: [
+                // Compact chat header
                 Container(
-                  margin: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Talking to: ${aiProvider.currentSession!.personality.capitalize()}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        width: 0.5,
                       ),
-                      TextButton.icon(
-                        icon: const Icon(Icons.stop, size: 20),
-                        label: const Text('End Chat'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+                    title: Row(
+                      children: [
+                        Icon(
+                          _getPersonalityIcon(aiProvider.currentSession!.personality),
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                        onPressed: () => _showEndChatDialog(aiProvider),
+                        const SizedBox(width: 12),
+                        Text(
+                          aiProvider.currentSession!.personality.capitalize(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: TextButton.icon(
+                      onPressed: () => _showEndChatDialog(aiProvider),
+                      icon: Icon(
+                        Icons.stop,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      label: Text(
+                        'End Chat',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Text(
+                          _getPersonalityDescription(aiProvider.currentSession!.personality),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -199,41 +230,47 @@ class _AIPracticePageState extends State<AIPracticePage> {
                     },
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, -1),
-                      ),
-                    ],
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(
-                            hintText: 'Type your message...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, -1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              hintText: 'Type your message...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                            onSubmitted: (_) => _sendMessage(aiProvider),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      FloatingActionButton(
-                        onPressed: () => _sendMessage(aiProvider),
-                        child: const Icon(Icons.send),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        FloatingActionButton(
+                          onPressed: () => _sendMessage(aiProvider),
+                          child: const Icon(Icons.send),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -375,22 +412,48 @@ class _AIPracticePageState extends State<AIPracticePage> {
   void _showEndChatDialog(AIPracticeProvider aiProvider) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('End Chat Session?'),
-        content: const Text('This will end your current chat session. You can start a new one with the same or different personality.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'End Chat Session?',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'This will end your current chat session. You can start a new one with the same or different personality.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      aiProvider.endCurrentSession();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('End Chat'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              aiProvider.endCurrentSession();
-              Navigator.pop(context);
-            },
-            child: const Text('End Chat'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -628,8 +691,10 @@ class _AIPracticePageState extends State<AIPracticePage> {
         userMessage,
         onMessageSent: () {
           if (mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _scrollToBottom();
+            Future.delayed(const Duration(milliseconds: 200), () {
+              if (mounted) {
+                _scrollToBottom();
+              }
             });
           }
         },
@@ -647,7 +712,7 @@ class _AIPracticePageState extends State<AIPracticePage> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 100),
         curve: Curves.easeOut,
       );
     }
@@ -657,5 +722,35 @@ class _AIPracticePageState extends State<AIPracticePage> {
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
+
+IconData _getPersonalityIcon(String personality) {
+  switch (personality.toLowerCase()) {
+    case 'skeptic':
+      return Icons.psychology;
+    case 'seeker':
+      return Icons.search;
+    case 'atheist':
+      return Icons.not_interested;
+    case 'religious':
+      return Icons.church;
+    default:
+      return Icons.person;
+  }
+}
+
+String _getPersonalityDescription(String personality) {
+  switch (personality.toLowerCase()) {
+    case 'skeptic':
+      return 'A critical thinker who questions beliefs and seeks evidence before accepting claims.';
+    case 'seeker':
+      return 'An open-minded individual exploring faith and spiritual matters with genuine curiosity.';
+    case 'atheist':
+      return 'Someone who does not believe in the existence of a god or divine beings.';
+    case 'religious':
+      return 'A person with strong religious convictions and established faith beliefs.';
+    default:
+      return 'A conversation partner for faith discussions.';
   }
 }
