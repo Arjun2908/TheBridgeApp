@@ -24,10 +24,13 @@ class ShareAppPage extends StatelessWidget {
     }
   }
 
-  void _shareApp(String link, String storeName) {
-    Share.share(
+  void _shareApp(String link, String storeName, BuildContext context) async {
+    final box = context.findRenderObject() as RenderBox?;
+
+    await Share.share(
       'Check out The Bridge App - an incredible tool for sharing your faith!\n\nGet it on $storeName: $link',
       subject: 'The Bridge App',
+      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
     );
   }
 
@@ -237,7 +240,7 @@ class ShareAppPage extends StatelessWidget {
                           const SizedBox(height: 16),
                           // Enhanced Share Button
                           FilledButton.icon(
-                            onPressed: () => _shareApp(link, storeName),
+                            onPressed: () => _shareApp(link, storeName, context),
                             icon: const Icon(Icons.share),
                             label: const Text('Share'),
                             style: FilledButton.styleFrom(
