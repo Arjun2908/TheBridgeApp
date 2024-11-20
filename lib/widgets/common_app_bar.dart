@@ -27,6 +27,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
       bottom: bottom,
+      forceMaterialTransparency: true,
     );
   }
 

@@ -866,6 +866,7 @@ class _AnimationPageState extends State<AnimationPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: AppBar(
+          forceMaterialTransparency: true,
           backgroundColor: isDarkMode ? Colors.black : const Color.fromRGBO(253, 246, 222, 1.000),
           actions: [
             IconButton(

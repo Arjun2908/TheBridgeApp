@@ -16,6 +16,7 @@ class AboutPage extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text('About'),
+            forceMaterialTransparency: true,
           ),
           body: SingleChildScrollView(
             child: Column(

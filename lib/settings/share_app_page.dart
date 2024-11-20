@@ -41,6 +41,7 @@ class ShareAppPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Share App'),
+          forceMaterialTransparency: true,
           bottom: const TabBar(
             tabs: [
               Tab(

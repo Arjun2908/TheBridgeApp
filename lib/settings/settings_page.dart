@@ -18,6 +18,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        forceMaterialTransparency: true,
       ),
       body: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
@@ -199,7 +200,6 @@ class SettingsPage extends StatelessWidget {
                       builder: (context) => const ShareAppPage(),
                     ));
                   },
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
               ),
               const SizedBox(height: 16),
