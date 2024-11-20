@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 
 import 'package:the_bridge_app/resources/providers/resource_provider.dart';
@@ -9,6 +8,9 @@ import 'package:the_bridge_app/global_helpers.dart';
 
 import 'package:the_bridge_app/bottom_nav_bar.dart';
 import 'package:the_bridge_app/widgets/common_app_bar.dart';
+import 'package:the_bridge_app/resources/pages/pdf_viewer_page.dart';
+import 'package:the_bridge_app/resources/pages/web_view_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ResourceLibraryPage extends StatefulWidget {
   const ResourceLibraryPage({super.key});
@@ -115,6 +117,19 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
     );
   }
 
+  void _openResource(BuildContext context, Resource resource) {
+    if (resource.type == ResourceType.video) {
+      _launchUrl(resource.url);
+    } else if (resource.type == ResourceType.studyGuide) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => resource.isStudyGuidePdf ? PdfViewerPage(resource: resource) : WebViewPage(resource: resource),
+        ),
+      );
+    }
+  }
+
   Widget _buildResourceCard(BuildContext context, Resource resource) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -122,7 +137,7 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) {
             setState(() => _isPressed = false);
-            _launchUrl(resource.url);
+            _openResource(context, resource);
           },
           onTapCancel: () => setState(() => _isPressed = false),
           child: AnimatedContainer(
@@ -153,7 +168,7 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
                         ],
                       ),
                       child: Icon(
-                        resource.type == ResourceType.video ? Icons.play_circle : Icons.picture_as_pdf,
+                        _getResourceIcon(resource.type),
                         size: 28,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -192,5 +207,16 @@ class _ResourceLibraryPageState extends State<ResourceLibraryPage> {
         );
       },
     );
+  }
+
+  IconData _getResourceIcon(ResourceType type) {
+    switch (type) {
+      case ResourceType.video:
+        return Icons.play_circle;
+      case ResourceType.studyGuide:
+        return Icons.book;
+      default:
+        return Icons.article;
+    }
   }
 }

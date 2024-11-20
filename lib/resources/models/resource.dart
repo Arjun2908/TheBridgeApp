@@ -12,6 +12,10 @@ class Resource {
     required this.type,
     required this.url,
   });
+
+  bool get isStudyGuidePdf => type == ResourceType.studyGuide && (url.toLowerCase().endsWith('.pdf') || url.startsWith('gs://'));
+
+  bool get isStudyGuideWeb => type == ResourceType.studyGuide && !isStudyGuidePdf;
 }
 
 enum ResourceType {
