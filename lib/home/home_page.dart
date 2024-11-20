@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () => onItemTapped(4, context),
                 child: Column(
                   children: [
-                    const Icon(Icons.play_circle_outline, size: 48),
+                    const Icon(Icons.play_circle_outline, size: 48, color: Colors.blue),
                     const SizedBox(height: 8),
                     Text(
                       'Start Bridge Diagram',
@@ -131,7 +131,9 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 8),
                     Text(
                       'Share the gospel using the Bridge illustration',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
